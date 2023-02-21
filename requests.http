@@ -1,0 +1,98 @@
+###
+# admin3 -> admin
+###
+POST http://127.0.0.1:8000/api/v1/auth/signup/
+Content-Type: application/json
+
+{
+    "username": "admin3",
+    "email": "admin3@admin.ru"
+}
+###
+# admin3 -> admin
+###
+POST http://127.0.0.1:8000/api/v1/auth/token/
+Content-Type: application/json
+
+{
+    "username": "admin3",
+    "confirmation_code": "MdgdrEG993S8KNeQHPy9ei0yYsoCTD1ZY4Bhij6wz9cGY9b0vdlFlNgAzmPdcLzC"
+}
+###
+# admin5 -> user
+###
+POST http://127.0.0.1:8000/api/v1/auth/token/
+Content-Type: application/json
+
+{
+    "username": "admin5",
+    "confirmation_code": "RipKMFoAp4gnB07Ab1D8PSYXDVgm5A4GhIPZc1l1NorQTUuGRjrLZMRR7o9J31YF"
+}
+###
+# admin3 -> admin
+###
+POST http://127.0.0.1:8000/api/v1/categories/
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDMxNDY0LCJpYXQiOjE2NzIyMjE4NjQsImp0aSI6ImFkNTZhNzk5MzM3MTRlN2NiN2RjZWY5NDg0ZTIyZDkzIiwidXNlcl9pZCI6MTA5fQ.QaUPvRVhwccKGkGp-42Uwssm086setbe93EEQcC6cr8
+Content-Type: application/json
+
+{
+    "name": "Программирование",
+    "slug": "programme"
+}
+###
+# admin3 -> admin
+###
+POST http://127.0.0.1:8000/api/v1/users/
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDMxNDY0LCJpYXQiOjE2NzIyMjE4NjQsImp0aSI6ImFkNTZhNzk5MzM3MTRlN2NiN2RjZWY5NDg0ZTIyZDkzIiwidXNlcl9pZCI6MTA5fQ.QaUPvRVhwccKGkGp-42Uwssm086setbe93EEQcC6cr8
+Content-Type: application/json
+
+{
+    "username": "user1",
+    "email": "user1@user.ru",
+    "first_name": "user",
+    "last_name": "last_user",
+    "bio": "this is user",
+    "role": "user"
+}
+###
+# anonim:
+###
+GET http://127.0.0.1:8000/api/v1/titles/6/reviews/9/
+###
+# admin3 -> admin
+###
+POST http://127.0.0.1:8000/api/v1/titles/10/reviews/
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDMxNDY0LCJpYXQiOjE2NzIyMjE4NjQsImp0aSI6ImFkNTZhNzk5MzM3MTRlN2NiN2RjZWY5NDg0ZTIyZDkzIiwidXNlcl9pZCI6MTA5fQ.QaUPvRVhwccKGkGp-42Uwssm086setbe93EEQcC6cr8
+Content-Type: application/json
+
+{
+    "text": "Мое первое ревью",
+    "score": "10"
+}
+###
+# admin5 -> auser
+###
+POST http://127.0.0.1:8000/api/v1/titles/12/reviews/
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDgzNzg3LCJpYXQiOjE2NzIyNzQxODcsImp0aSI6ImIyYmFlODNmMjMzNTQzMWVhYTQ0MGQ4NGM2ZjcwZWIzIiwidXNlcl9pZCI6MTA4fQ.w4NYKTIF2lwPNEy3dNq4fE1kW_DtUV3oGbhNbzkBBDI
+Content-Type: application/json
+
+{
+    "text": "Мое первое ревью",
+    "score": "9"
+}
+###
+# anonym
+###
+POST http://127.0.0.1:8000/api/v1/titles/10/reviews/
+Content-Type: application/json
+
+{
+    "text": "Мое первое ревью",
+    "score": "10"
+}
+###
+# anonym
+###
+GET http://127.0.0.1:8000/api/v1/titles/10/reviews/
+Content-Type: application/json
+###
