@@ -26,6 +26,7 @@ class User(AbstractUser):
     )
 
     class Meta:
+        ordering = ('pk',)
         verbose_name = 'пользователя'
         verbose_name_plural = '1. Пользователи'
 
@@ -51,7 +52,7 @@ class Tag(models.Model):
     )
 
     class Meta:
-        ordering = ('slug',)
+        ordering = ('pk',)
         verbose_name = 'тег'
         verbose_name_plural = '2. Теги'
 
@@ -74,7 +75,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('pk',)
         verbose_name = 'ингридиент'
         verbose_name_plural = '3. Ингридиенты'
 
@@ -134,7 +135,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('pk',)
         verbose_name = 'рецепт'
         verbose_name_plural = '4. Рецепты'
 
@@ -176,7 +177,7 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        ordering = ('recipe',)
+        ordering = ('pk',)
         verbose_name = 'у рецепта нужные ингридиенты'
         verbose_name_plural = '5. Рецепты и ингридиенты'
 
@@ -204,7 +205,7 @@ class RecipeTag(models.Model):
     )
 
     class Meta:
-        ordering = ('recipe',)
+        ordering = ('pk',)
         verbose_name = 'у рецепта нужные теги'
         verbose_name_plural = '6. Рецепты и теги'
 
@@ -232,7 +233,7 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        ordering = ('user',)
+        ordering = ('pk',)
         verbose_name = 'список покупок'
         verbose_name_plural = '7. Список покупок'
 
@@ -255,7 +256,7 @@ class Follow(models.Model):
     )
 
     class Meta:
-        ordering = ('user',)
+        ordering = ('pk',)
         verbose_name = 'подписку'
         verbose_name_plural = '8. Подписки'
         constraints = [
