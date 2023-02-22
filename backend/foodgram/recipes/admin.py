@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from recipes.models import User, Tag, Ingredient, RecipeIngredient, Recipe, RecipeTag
+from recipes.models import (
+    User, Tag, Ingredient, RecipeIngredient, Recipe, RecipeTag, UserRecipe
+)
 
 
 @admin.register(User)
@@ -13,7 +15,7 @@ class UserAdmin(admin.ModelAdmin):
         'last_name',
         'password',
         'is_staff',
-        'date_joined'
+        'date_joined',
     )
     list_editable = ('first_name', 'last_name', 'is_staff')
     search_fields = ('username', 'email')
@@ -75,3 +77,14 @@ class RecipeTagAdmin(admin.ModelAdmin):
     )
     list_editable = ('recipe', 'tag')
     search_fields = ('recipe', 'tag')
+
+
+@admin.register(UserRecipe)
+class UserRecipeAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'user',
+        'recipe',
+    )
+    list_editable = ('user', 'recipe')
+    search_fields = ('user',)

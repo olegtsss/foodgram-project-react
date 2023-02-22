@@ -15,32 +15,6 @@ MAX_COOKING_TIME = 1440
 COOKING_TIME_MESSAGE = 'Указано не корректное время приготовления.'
 
 
-class User(AbstractUser):
-    """Кастомная модель пользователя."""
-
-    email = models.EmailField(
-        'Адрес электронной почты',
-        max_length=settings.MAX_LENGTH_EMAIL,
-        unique=True,
-    )
-    first_name = models.CharField(
-        'Имя',
-        max_length=settings.MAX_LENGTH_FIRSTNAME
-    )
-    last_name = models.CharField(
-        'Фамилия',
-        max_length=settings.MAX_LENGTH_LASTNAME
-    )
-    password = models.CharField(
-        'Пароль',
-        max_length=settings.MAX_LENGTH_PASSWORD
-    )
-
-    class Meta:
-        verbose_name = 'пользователя'
-        verbose_name_plural = 'Пользователи на портале'
-
-
 class Tag(models.Model):
     """Модель тегов."""
 
@@ -64,7 +38,7 @@ class Tag(models.Model):
     class Meta:
         ordering = ('slug',)
         verbose_name = 'тег'
-        verbose_name_plural = 'Теги на портале'
+        verbose_name_plural = 'Теги'
 
     def __str__(self):
         return self.name
@@ -87,7 +61,7 @@ class Ingredient(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'ингридиент'
-        verbose_name_plural = 'Ингридиенты на портале'
+        verbose_name_plural = 'Ингридиенты'
 
     def __str__(self):
         return self.name
@@ -139,7 +113,7 @@ class Recipe(models.Model):
     class Meta:
         ordering = ('name',)
         verbose_name = 'рецепт'
-        verbose_name_plural = 'Рецепты на портале'
+        verbose_name_plural = 'Рецепты'
 
 
 class RecipeIngredient(models.Model):
@@ -163,7 +137,7 @@ class RecipeIngredient(models.Model):
 
     class Meta:
         verbose_name = 'у рецепта нужные ингридиенты'
-        verbose_name_plural = 'Рецепты и ингридиенты на портале'
+        verbose_name_plural = 'Рецепты и ингридиенты'
         ordering = ('recipe',)
 
     def __str__(self):
@@ -191,8 +165,105 @@ class RecipeTag(models.Model):
 
     class Meta:
         verbose_name = 'у рецепта нужные теги'
-        verbose_name_plural = 'Рецепты и теги на портале'
+        verbose_name_plural = 'Рецепты и теги'
         ordering = ('recipe',)
 
     def __str__(self):
         return f'{self.recipe} {self.tag}'
+
+
+class User(AbstractUser):
+    """Кастомная модель пользователя."""
+
+    email = models.EmailField(
+        'Адрес электронной почты',
+        max_length=settings.MAX_LENGTH_EMAIL,
+        unique=True,
+    )
+    first_name = models.CharField(
+        'Имя',
+        max_length=settings.MAX_LENGTH_FIRSTNAME
+    )
+    last_name = models.CharField(
+        'Фамилия',
+        max_length=settings.MAX_LENGTH_LASTNAME
+    )
+    password = models.CharField(
+        'Пароль',
+        max_length=settings.MAX_LENGTH_PASSWORD
+    )
+    shopping_cart = models.ManyToManyField(
+        Recipe,
+        through='UserRecipe',
+        null=True,
+        related_name='users',
+        verbose_name='Список покупок',
+        help_text='Введите рецепты для списка покупок'
+    )
+
+    class Meta:
+        verbose_name = 'пользователя'
+        verbose_name_plural = 'Пользователи'
+
+
+class UserRecipe(models.Model):
+    """
+    У одного пользователя может быть несколько рецептов в списке покупок.
+    В этой модели будут связаны id пользователей и id рецептов.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        help_text='Введите ID пользователя'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        help_text='Введите ID рецепта'
+    ),
+    is_favorite = models.BooleanField(
+        default=False,
+        verbose_name='Избранное',
+        help_text='Добавить в избранное'
+    )
+
+    class Meta:
+        verbose_name = 'у пользователя список покупок'
+        verbose_name_plural = 'Список покупок пользователя'
+        ordering = ('user',)
+
+    def __str__(self):
+        return self.recipe
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='Пользователь'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='Автор'
+    )
+
+    class Meta:
+        verbose_name = 'подписку'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('author')),
+                name='user is not author',
+            ),
+            models.UniqueConstraint(
+                fields=['user', 'author'], name='unique_following')
+        ]
+
+    def __str__(self):
+        return f'{self.user.username}, {self.author.username}'
