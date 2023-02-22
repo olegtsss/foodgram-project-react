@@ -1,8 +1,7 @@
 from django.contrib import admin
 
-from recipes.models import (
-    User, Tag, Ingredient, RecipeIngredient, Recipe, RecipeTag, UserRecipe
-)
+from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
+                            RecipeTag, ShoppingCart, Tag, User)
 
 
 @admin.register(User)
@@ -32,6 +31,7 @@ class TagAdmin(admin.ModelAdmin):
     )
     list_editable = ('name', 'color')
     search_fields = ('name',)
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Ingredient)
@@ -79,12 +79,24 @@ class RecipeTagAdmin(admin.ModelAdmin):
     search_fields = ('recipe', 'tag')
 
 
-@admin.register(UserRecipe)
-class UserRecipeAdmin(admin.ModelAdmin):
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
         'recipe',
+        'is_favorite',
     )
-    list_editable = ('user', 'recipe')
-    search_fields = ('user',)
+    list_editable = ('user', 'recipe', 'is_favorite')
+    search_fields = ('user', 'recipe')
+
+
+@admin.register(Follow)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'user',
+        'author',
+    )
+    list_editable = ('user', 'author')
+    search_fields = ('user', 'author')
