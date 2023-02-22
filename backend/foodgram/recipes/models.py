@@ -109,7 +109,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Картинка',
-        upload_to='recipes/',
+        upload_to='static/',
         help_text='Выберете картинку для рецепта'
     )
     name = models.CharField(
