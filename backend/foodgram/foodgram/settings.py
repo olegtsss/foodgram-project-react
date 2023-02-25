@@ -1,4 +1,8 @@
 import os
+from datetime import timedelta
+from pathlib import Path
+
+# from dotenv import load_dotenv
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
+    'rest_framework',
+    #'django_filters',
+    'rest_framework.authtoken',
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -108,3 +115,19 @@ MIN_INGREDIENT_COUNT = 1
 MAX_INGREDIENT_COUNT = 999999999
 # Сообщение для некорректно указанного количества ингридиента
 INGREDIENT_COUNT_MESSAGE = 'Указано не корректное количество.'
+
+# Работа с токенами
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    #'DEFAULT_FILTER_BACKENDS': [
+    #    'django_filters.rest_framework.DjangoFilterBackend',
+    #],
+    #'DEFAULT_PAGINATION_CLASS':
+    #    'rest_framework.pagination.PageNumberPagination',
+    #'PAGE_SIZE': 5,
+}

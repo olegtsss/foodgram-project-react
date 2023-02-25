@@ -1,98 +1,80 @@
 ###
-# admin3 -> admin
+# Ингридиенты
 ###
-POST http://127.0.0.1:8000/api/v1/auth/signup/
+GET http://127.0.0.1:8000/api/ingredients/3/
+
+###
+# Пользователи
+###
+GET http://127.0.0.1:8000/api/users/
+###
+GET http://127.0.0.1:8000/api/users/
+Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+###
+GET http://127.0.0.1:8000/api/users/?limit=2
+###
+GET http://127.0.0.1:8000/api/users/3/
+###
+GET http://127.0.0.1:8000/api/users/3/
+Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+###
+POST http://127.0.0.1:8000/api/auth/token/login/
 Content-Type: application/json
 
 {
-    "username": "admin3",
-    "email": "admin3@admin.ru"
+    "password": "0123456789",
+    "email": "admin@admin.ru"
 }
 ###
-# admin3 -> admin
-###
-POST http://127.0.0.1:8000/api/v1/auth/token/
+POST http://127.0.0.1:8000/api/auth/token/login/
 Content-Type: application/json
 
 {
-    "username": "admin3",
-    "confirmation_code": "MdgdrEG993S8KNeQHPy9ei0yYsoCTD1ZY4Bhij6wz9cGY9b0vdlFlNgAzmPdcLzC"
+    "password": "Qwerty123",
+    "email": "vpupkin9@yandex.ru"
 }
 ###
-# admin5 -> user
+GET http://127.0.0.1:8000/api/users/me/
 ###
-POST http://127.0.0.1:8000/api/v1/auth/token/
+GET http://127.0.0.1:8000/api/users/me/
+Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+###
+POST http://127.0.0.1:8000/api/users/
 Content-Type: application/json
 
 {
-    "username": "admin5",
-    "confirmation_code": "RipKMFoAp4gnB07Ab1D8PSYXDVgm5A4GhIPZc1l1NorQTUuGRjrLZMRR7o9J31YF"
+    "email": "vpupkin9@yandex.ru",
+    "username": "vasya.pupkin9",
+    "first_name": "Вася9",
+    "last_name": "Пупкин9",
+    "password": "Qwerty123"
 }
 ###
-# admin3 -> admin
+POST http://127.0.0.1:8000/api/users/set_password/
+Content-Type: application/json
+Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+
+{
+    "new_password": "0123456789",
+    "current_password": "987654321"
+}
 ###
-POST http://127.0.0.1:8000/api/v1/categories/
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDMxNDY0LCJpYXQiOjE2NzIyMjE4NjQsImp0aSI6ImFkNTZhNzk5MzM3MTRlN2NiN2RjZWY5NDg0ZTIyZDkzIiwidXNlcl9pZCI6MTA5fQ.QaUPvRVhwccKGkGp-42Uwssm086setbe93EEQcC6cr8
+POST http://127.0.0.1:8000/api/users/set_password/
+Content-Type: application/json
+Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+
+{
+    "new_password": "987654321"
+}
+###
+POST http://127.0.0.1:8000/api/users/set_password/
 Content-Type: application/json
 
 {
-    "name": "Программирование",
-    "slug": "programme"
+    "new_password": "987654321",
+    "current_password": "0123456789"
 }
 ###
-# admin3 -> admin
-###
-POST http://127.0.0.1:8000/api/v1/users/
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDMxNDY0LCJpYXQiOjE2NzIyMjE4NjQsImp0aSI6ImFkNTZhNzk5MzM3MTRlN2NiN2RjZWY5NDg0ZTIyZDkzIiwidXNlcl9pZCI6MTA5fQ.QaUPvRVhwccKGkGp-42Uwssm086setbe93EEQcC6cr8
+POST http://127.0.0.1:8000/api/auth/token/logout/
 Content-Type: application/json
-
-{
-    "username": "user1",
-    "email": "user1@user.ru",
-    "first_name": "user",
-    "last_name": "last_user",
-    "bio": "this is user",
-    "role": "user"
-}
-###
-# anonim:
-###
-GET http://127.0.0.1:8000/api/v1/titles/6/reviews/9/
-###
-# admin3 -> admin
-###
-POST http://127.0.0.1:8000/api/v1/titles/10/reviews/
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDMxNDY0LCJpYXQiOjE2NzIyMjE4NjQsImp0aSI6ImFkNTZhNzk5MzM3MTRlN2NiN2RjZWY5NDg0ZTIyZDkzIiwidXNlcl9pZCI6MTA5fQ.QaUPvRVhwccKGkGp-42Uwssm086setbe93EEQcC6cr8
-Content-Type: application/json
-
-{
-    "text": "Мое первое ревью",
-    "score": "10"
-}
-###
-# admin5 -> auser
-###
-POST http://127.0.0.1:8000/api/v1/titles/12/reviews/
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjczNDgzNzg3LCJpYXQiOjE2NzIyNzQxODcsImp0aSI6ImIyYmFlODNmMjMzNTQzMWVhYTQ0MGQ4NGM2ZjcwZWIzIiwidXNlcl9pZCI6MTA4fQ.w4NYKTIF2lwPNEy3dNq4fE1kW_DtUV3oGbhNbzkBBDI
-Content-Type: application/json
-
-{
-    "text": "Мое первое ревью",
-    "score": "9"
-}
-###
-# anonym
-###
-POST http://127.0.0.1:8000/api/v1/titles/10/reviews/
-Content-Type: application/json
-
-{
-    "text": "Мое первое ревью",
-    "score": "10"
-}
-###
-# anonym
-###
-GET http://127.0.0.1:8000/api/v1/titles/10/reviews/
-Content-Type: application/json
-###
+Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd

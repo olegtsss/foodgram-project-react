@@ -3,10 +3,10 @@ from rest_framework.routers import DefaultRouter
 from django.urls import include, path
 
 from api.views import (DownloadShoppingCartViewSet, FavoriteViewSet,
-                       IngredientsViewSet, login, logout, RecipesViewSet,
+                       IngredientsViewSet, logout, RecipesViewSet,
                        SetPasswordViewSet, ShoppingCartViewSet,
                        SubscribeViewSet, SubscriptionsViewSet, TagsViewSet,
-                       UserViewSet)
+                       UserViewSet, CustomAuthToken, set_password)
 
 
 router_v1 = DefaultRouter()
@@ -27,9 +27,6 @@ router_v1.register(
 router_v1.register('ingredients', IngredientsViewSet, basename='ingredients')
 router_v1.register('users', UserViewSet, basename='users')
 router_v1.register(
-    'users/set_password', SetPasswordViewSet, basename='set_password'
-)
-router_v1.register(
     'users/subscriptions', SubscriptionsViewSet, basename='subscriptions'
 )
 router_v1.register(
@@ -38,8 +35,9 @@ router_v1.register(
 )
 
 urlpatterns = [
-    path('auth/token/login/', login, name='login'),
+    path('auth/token/login/', CustomAuthToken.as_view()),
     path('auth/token/logout/', logout, name='logout'),
+    path('users/set_password/', set_password, name='set_password'),
     path('', include(router_v1.urls))
 ]
 
@@ -55,12 +53,6 @@ urlpatterns = [
 # api/ingredients/
 # api/ingredients/{id}/
 
-# api/users/
-# api/users/{id}/
-# api/users/me/
-# api/users/set_password/
 # api/users/subscriptions/
 # api/users/{id}/subscribe/
 
-# api/auth/token/login/
-# api/auth/token/logout/

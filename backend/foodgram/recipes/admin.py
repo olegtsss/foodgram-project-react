@@ -16,7 +16,7 @@ class UserAdmin(admin.ModelAdmin):
         'is_staff',
         'date_joined',
     )
-    list_editable = ('first_name', 'last_name', 'is_staff')
+    list_editable = ('first_name', 'last_name', 'is_staff', 'password')
     search_fields = ('username', 'email')
     empty_value_display = '-пусто-'
 
