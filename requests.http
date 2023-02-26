@@ -1,22 +1,17 @@
 ###
-# Ингридиенты
-###
-GET http://127.0.0.1:8000/api/ingredients/3/
-
-###
 # Пользователи
 ###
 GET http://127.0.0.1:8000/api/users/
 ###
 GET http://127.0.0.1:8000/api/users/
-Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
 GET http://127.0.0.1:8000/api/users/?limit=2
 ###
 GET http://127.0.0.1:8000/api/users/3/
 ###
 GET http://127.0.0.1:8000/api/users/3/
-Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
 POST http://127.0.0.1:8000/api/auth/token/login/
 Content-Type: application/json
@@ -37,22 +32,22 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/api/users/me/
 ###
 GET http://127.0.0.1:8000/api/users/me/
-Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
 POST http://127.0.0.1:8000/api/users/
 Content-Type: application/json
 
 {
-    "email": "vpupkin9@yandex.ru",
-    "username": "vasya.pupkin9",
-    "first_name": "Вася9",
-    "last_name": "Пупкин9",
+    "email": "vpupkin10@yandex.ru",
+    "username": "vasya.pupkin10",
+    "first_name": "Вася10",
+    "last_name": "Пупкин10",
     "password": "Qwerty123"
 }
 ###
 POST http://127.0.0.1:8000/api/users/set_password/
 Content-Type: application/json
-Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 
 {
     "new_password": "0123456789",
@@ -61,7 +56,7 @@ Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
 ###
 POST http://127.0.0.1:8000/api/users/set_password/
 Content-Type: application/json
-Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 
 {
     "new_password": "987654321"
@@ -77,4 +72,40 @@ Content-Type: application/json
 ###
 POST http://127.0.0.1:8000/api/auth/token/logout/
 Content-Type: application/json
-Authorization: Token 286de687a34610db7b67ce7113d25357e94493cd
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+
+
+
+
+###
+# Теги
+###
+GET http://127.0.0.1:8000/api/tags/
+###
+GET http://127.0.0.1:8000/api/tags/2/
+
+
+
+###
+# Ингридиенты
+###
+GET http://127.0.0.1:8000/api/ingredients/
+###
+GET http://127.0.0.1:8000/api/ingredients/3/
+###
+GET http://127.0.0.1:8000/api/ingredients/?search=абрикосовый
+###
+
+
+
+###
+# Рецепты
+###
+GET http://127.0.0.1:8000/api/recipes/
+###
+GET http://127.0.0.1:8000/api/recipes/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+GET http://127.0.0.1:8000/api/recipes/3/
+###
+

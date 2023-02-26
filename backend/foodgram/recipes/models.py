@@ -226,19 +226,42 @@ class ShoppingCart(models.Model):
         related_name='recipe_in_cart',
         verbose_name='Рецепт'
     )
-    is_favorite = models.BooleanField(
-        default=False,
-        verbose_name='Избранное',
-        help_text='Добавить в избранное'
+
+    class Meta:
+        ordering = ('pk',)
+        verbose_name = 'рецепт'
+        verbose_name_plural = '7. Список покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='unique_shopping_cart')
+        ]
+
+    def __str__(self):
+        return f'{self.user.username}, {self.recipe.name}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favoriter',
+        verbose_name='Пользователь',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_in_favorite',
+        verbose_name='Рецепт',
     )
 
     class Meta:
         ordering = ('pk',)
-        verbose_name = 'список покупок'
-        verbose_name_plural = '7. Список покупок'
-
-    def __str__(self):
-        return f'{self.user.username}, {self.recipe.name}'
+        verbose_name = 'рецепт'
+        verbose_name_plural = '8. Список избранного'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='unique_favorite')
+        ]
 
 
 class Follow(models.Model):
@@ -258,7 +281,7 @@ class Follow(models.Model):
     class Meta:
         ordering = ('pk',)
         verbose_name = 'подписку'
-        verbose_name_plural = '8. Подписки'
+        verbose_name_plural = '9. Подписки'
         constraints = [
             models.CheckConstraint(
                 check=~models.Q(user=models.F('author')),

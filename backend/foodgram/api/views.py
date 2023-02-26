@@ -5,7 +5,8 @@ from string import ascii_lowercase, ascii_uppercase, digits
 # from api.filters import TitleFilter
 #from api.permissions import 
 from api.serializers import (
-    IngredientSerializer, UserSerializer, UserSerializerExtended, UserCreateSerializer, SetPasswordSerializer
+    IngredientSerializer, UserSerializer, UserSerializerExtended, UserCreateSerializer,
+    TagSerializer, SetPasswordSerializer, RecipeSerializer
 )
 from django.conf import settings
 from django.core.mail import send_mail
@@ -16,7 +17,7 @@ from rest_framework import status
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin)
+                                   ListModelMixin, RetrieveModelMixin)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -32,6 +33,8 @@ from rest_framework.pagination import PageNumberPagination
 from api.pagination import CustomPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django.contrib.auth.hashers import check_password
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 ERROR_MESSAGE_FOR_USERNAME = (
@@ -39,12 +42,38 @@ ERROR_MESSAGE_FOR_USERNAME = (
 )
 
 
-class TagsViewSet(ModelViewSet):
-    ...
+class TagsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    """Работа с тегами."""
+
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    # permission_classes = (IsAdminOrReadOnly,)
+
+
+class IngredientsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+    """Работа с ингридентами."""
+
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    # permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('^name',)
 
 
 class RecipesViewSet(ModelViewSet):
-    ...
+    """Работа с рецептами."""
+
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = (
+        'author',
+        #'is_favorited',
+        #'is_in_shopping_cart',
+        'tags'
+    )
+    #permission_classes = [IsOwnerOrReadOnly]
+
 
 class DownloadShoppingCartViewSet(ModelViewSet):
     ...
@@ -57,17 +86,6 @@ class FavoriteViewSet(ModelViewSet):
     ...
 
 
-class IngredientsViewSet(ModelViewSet):
-    """Работа с ингридентами."""
-
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
-
-
-class SetPasswordViewSet(ModelViewSet):
-    ...
-
-
 class SubscriptionsViewSet(ModelViewSet):
     ...
 
@@ -76,7 +94,7 @@ class SubscribeViewSet(ModelViewSet):
     ...
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
     """Работа с пользователями."""
 
     queryset = User.objects.all()

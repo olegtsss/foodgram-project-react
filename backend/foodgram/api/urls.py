@@ -4,7 +4,7 @@ from django.urls import include, path
 
 from api.views import (DownloadShoppingCartViewSet, FavoriteViewSet,
                        IngredientsViewSet, logout, RecipesViewSet,
-                       SetPasswordViewSet, ShoppingCartViewSet,
+                       ShoppingCartViewSet,
                        SubscribeViewSet, SubscriptionsViewSet, TagsViewSet,
                        UserViewSet, CustomAuthToken, set_password)
 
@@ -41,17 +41,11 @@ urlpatterns = [
     path('', include(router_v1.urls))
 ]
 
-# api/tags/
-# api/tags/{id}/
-
 # api/recipes/
 # api/recipes/{id}/
 # api/recipes/download_shopping_cart/
 # api/recipes/{id}/shopping_cart/
 # api/recipes/{id}/favorite/
-
-# api/ingredients/
-# api/ingredients/{id}/
 
 # api/users/subscriptions/
 # api/users/{id}/subscribe/

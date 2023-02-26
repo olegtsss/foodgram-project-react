@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
-                            RecipeTag, ShoppingCart, Tag, User)
+                            RecipeTag, ShoppingCart, Tag, User, Favorite)
 
 
 @admin.register(User)
@@ -63,8 +63,9 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
         'pk',
         'recipe',
         'ingredient',
+        'count'
     )
-    list_editable = ('recipe', 'ingredient')
+    list_editable = ('recipe', 'ingredient', 'count')
     search_fields = ('recipe', 'ingredient')
 
 
@@ -85,14 +86,24 @@ class ShoppingCartAdmin(admin.ModelAdmin):
         'pk',
         'user',
         'recipe',
-        'is_favorite',
     )
-    list_editable = ('user', 'recipe', 'is_favorite')
+    list_editable = ('user', 'recipe')
+    search_fields = ('user', 'recipe')
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'user',
+        'recipe',
+    )
+    list_editable = ('user', 'recipe')
     search_fields = ('user', 'recipe')
 
 
 @admin.register(Follow)
-class ShoppingCartAdmin(admin.ModelAdmin):
+class FollowAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
