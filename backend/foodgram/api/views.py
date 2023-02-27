@@ -66,11 +66,25 @@ class RecipesViewSet(ModelViewSet):
     """Работа с рецептами."""
 
     queryset = Recipe.objects.all()
-    pagination_class = CustomPagination
     serializer_class = RecipeSerializer
+    pagination_class = CustomPagination
     permission_classes = (AdminOrAuthorOrReadOnly,)
-    filter_backends = [DjangoFilterBackend, ]
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+
+    # def get_serializer_class(self):
+    #     """Выбор сериализатора."""
+    #     if self.action == 'create':
+    #         return RecipeCreateSerializer
+    #     if self.action == 'list' or self.action == 'retrieve':
+    #         return RecipeSerializer
+    #     return UserSerializer
+
+    def get_permissions(self):
+        """Выбор permission."""
+        if self.action == 'create' or self.action == 'retrieve':
+            return (IsAuthenticated(),)
+        return super().get_permissions()
 
 
 class DownloadShoppingCartViewSet(ModelViewSet):

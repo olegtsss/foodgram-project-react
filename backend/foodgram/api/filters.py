@@ -1,15 +1,15 @@
 from django_filters.rest_framework import FilterSet
 from django_filters.rest_framework.filters import (
-    AllValuesMultipleFilter, ModelChoiceFilter, BooleanFilter
+    AllValuesMultipleFilter, BooleanFilter, CharFilter
 )
 
-from recipes.models import Recipe, User
+from recipes.models import Recipe
 
 
 class RecipeFilter(FilterSet):
     """Кастомный фильтр для рецептов."""
 
-    author = ModelChoiceFilter(queryset=User.objects.all())
+    author = CharFilter(field_name='author__username')
     tags = AllValuesMultipleFilter(field_name='tags__slug')
     is_favorited = BooleanFilter(method='get_favorite')
     is_in_shopping_cart = BooleanFilter(method='get_shopping_cart')
