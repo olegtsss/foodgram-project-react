@@ -16,13 +16,18 @@ from django.conf import settings
 
 
 BAD_USERNAME = 'Нельзя использовать в качестве username {username}!'
-VALIDATION_ERROR = '{key}: Обязательное поле'
-VALIDATION_ERROR_INGREDIENT_NAME = 'Ингридиенты должны быть уникальными: {key}'
-VALIDATION_ERROR_INGREDIENT_ID = 'Не корректно задан ингридиент: {key}'
+VALIDATION_ERROR = '{key}: Обязательное поле!'
+INGREDIENT_COUNT_MIN_MESSAGE = (
+    '{key1}: Количество ингредиента должно быть меньше {key2}!')
+INGREDIENT_COUNT_MAX_MESSAGE = (
+    '{key1}: Количество ингредиента должно быть больше {key2}!')
+VALIDATION_ERROR_INGREDIENT_NAME = (
+    '{key}: Ингридиенты должны быть уникальными!')
+VALIDATION_ERROR_INGREDIENT_ID = '{key}: Не корректно задан ингридиент!'
 VALIDATION_ERROR_INGREDIENT_AMOUNT = (
-    'Количество ингридиента должно быть числом: {key}')
-VALIDATION_ERROR_TAG_ID = 'Не корректно задан тег: {key}'
-VALIDATION_ERROR_TAG_NAME = 'Теги должны быть уникальными'
+    '{key}: Количество ингридиента должно быть числом!')
+VALIDATION_ERROR_TAG_ID = '{key}: Не корректно задан тег!'
+VALIDATION_ERROR_TAG_NAME = '{key}: Теги должны быть уникальными!'
 
 
 class Base64ImageField(ImageField):
@@ -141,7 +146,7 @@ class RecipeSerializer(ModelSerializer):
     """Сериализатор для модели Recipe."""
 
     ingredients = SerializerMethodField()
-    author = SerializerMethodField()
+    author = SerializerMethodField(read_only=True)
     tags = SerializerMethodField()
     image = Base64ImageField()
     is_favorited = SerializerMethodField()
@@ -215,9 +220,17 @@ class RecipeSerializer(ModelSerializer):
                         key=ingredient.name)
                 )
             if ingredient_amount['amount'] < settings.MIN_INGREDIENT_COUNT:
-                raise ValidationError(settings.INGREDIENT_COUNT_MESSAGE)
+                raise ValidationError(
+                    INGREDIENT_COUNT_MIN_MESSAGE.format(
+                        key1=ingredient_amount['amount'],
+                        key2=settings.MIN_INGREDIENT_COUNT)
+                )
             if ingredient_amount['amount'] > settings.MAX_INGREDIENT_COUNT:
-                raise ValidationError(settings.INGREDIENT_COUNT_MESSAGE)
+                raise ValidationError(
+                    INGREDIENT_COUNT_MAX_MESSAGE.format(
+                        key1=ingredient_amount['amount'],
+                        key2=settings.MAX_INGREDIENT_COUNT)
+                )
             ingredients_list.append(ingredient)
         # Проверка полученных значений для поля tags
         # tags = [1, 2]
@@ -226,12 +239,33 @@ class RecipeSerializer(ModelSerializer):
                 raise ValidationError(VALIDATION_ERROR_TAG_ID.format(key=tag))
             tag = get_object_or_404(Tag, id=tag)
             if tag in tags_list:
-                raise ValidationError(VALIDATION_ERROR_TAG_NAME)
+                raise ValidationError(
+                    VALIDATION_ERROR_TAG_NAME.format(key=tag)
+                )
             tags_list.append(tag)
         # Проверки пройдены, добавляем поля в validated_data
         data['ingredients'] = ingredients
         data['tags'] = tags
         return data
+
+    def create_ingredients(self, ingredients, recipe):
+        """
+        Вспомонательная функция. Создает объект в модели RecipeIngredient.
+        ingredients = [{"id": 1123, "amount": 10}]
+        """
+        for ingredient_volume in ingredients:
+            RecipeIngredient.objects.create(
+                ingredient=Ingredient.objects.get(pk=ingredient_volume['id']),
+                count=ingredient_volume['amount'], recipe=recipe)
+
+    def create_tags(self, tags, recipe):
+        """
+        Вспомонательная функция. Создает объект в модели RecipeTag.
+        tags = [1, 2]
+        """
+        for tag in tags:
+            RecipeTag.objects.create(
+                tag=Tag.objects.get(pk=tag), recipe=recipe)
 
     def create(self, validated_data):
         """
@@ -244,17 +278,25 @@ class RecipeSerializer(ModelSerializer):
         tags = validated_data.pop('tags')
         author = self.context.get('request').user
         recipe = Recipe.objects.create(author=author, **validated_data)
-        # ingredients = [{"id": 1123, "amount": 10}]
-        for ingredient_volume in ingredients:
-            RecipeIngredient.objects.create(
-                ingredient=Ingredient.objects.get(pk=ingredient_volume['id']),
-                count=ingredient_volume['amount'], recipe=recipe)
-        # tags = [1, 2]
-        for tag in tags:
-            RecipeTag.objects.create(
-                tag=Tag.objects.get(pk=tag), recipe=recipe
-            )
+        self.create_ingredients(ingredients, recipe)
+        self.create_tags(tags, recipe)
         return recipe
+
+    def update(self, instance, validated_data):
+        """Изменение рецепта методом PATCH."""
+        instance.image = validated_data['image']
+        instance.name = validated_data['name']
+        instance.text = validated_data['text']
+        instance.cooking_time = validated_data['cooking_time']
+        ingredients = validated_data.pop('ingredients')
+        RecipeIngredient.objects.filter(recipe=instance).delete()
+        self.create_ingredients(ingredients, instance)
+        tags = validated_data.pop('tags')
+        RecipeTag.objects.filter(recipe=instance).delete()
+        self.create_tags(tags, instance)
+        instance.save()
+        return instance
+
 
 
 

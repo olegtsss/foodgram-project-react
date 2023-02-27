@@ -20,7 +20,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
 # from rest_framework_simplejwt.tokens import RefreshToken
 
 from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
@@ -44,7 +44,7 @@ ERROR_MESSAGE_FOR_USERNAME = (
 )
 
 
-class TagsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class TagsViewSet(ReadOnlyModelViewSet):
     """Работа с тегами."""
 
     queryset = Tag.objects.all()
@@ -52,7 +52,7 @@ class TagsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     permission_classes = (AdminOrReadOnly,)
 
 
-class IngredientsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class IngredientsViewSet(ReadOnlyModelViewSet):
     """Работа с ингридентами."""
 
     queryset = Ingredient.objects.all()
@@ -72,17 +72,9 @@ class RecipesViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
-    # def get_serializer_class(self):
-    #     """Выбор сериализатора."""
-    #     if self.action == 'create':
-    #         return RecipeCreateSerializer
-    #     if self.action == 'list' or self.action == 'retrieve':
-    #         return RecipeSerializer
-    #     return UserSerializer
-
     def get_permissions(self):
         """Выбор permission."""
-        if self.action == 'create' or self.action == 'retrieve':
+        if self.action == 'create':
             return (IsAuthenticated(),)
         return super().get_permissions()
 

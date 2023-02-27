@@ -109,7 +109,7 @@ Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 GET http://127.0.0.1:8000/api/recipes/?limit=2
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
-GET http://127.0.0.1:8000/api/recipes/3/
+GET http://127.0.0.1:8000/api/recipes/15/
 ###
 GET http://127.0.0.1:8000/api/recipes/?is_favorited=1
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
@@ -130,8 +130,8 @@ Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 {
   "ingredients": [
     {
-      "id": "1123",
-      "amount": 10
+      "id": 1123,
+      "amount": 14
     }
   ],
   "tags": [
@@ -143,3 +143,27 @@ Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
   "text": "string",
   "cooking_time": 1
 }
+###
+PATCH  http://127.0.0.1:8000/api/recipes/16/
+Content-Type: application/json
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+
+{
+  "ingredients": [
+    {
+      "id": 1123,
+      "amount": 11
+    }
+  ],
+  "tags": [
+    1,
+    2
+  ],
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
+  "name": "string3",
+  "text": "string3",
+  "cooking_time": 1
+}
+###
+DELETE  http://127.0.0.1:8000/api/recipes/14/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
