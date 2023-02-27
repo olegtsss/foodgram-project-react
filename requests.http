@@ -106,6 +106,20 @@ GET http://127.0.0.1:8000/api/recipes/
 GET http://127.0.0.1:8000/api/recipes/
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
+GET http://127.0.0.1:8000/api/recipes/?limit=2
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
 GET http://127.0.0.1:8000/api/recipes/3/
 ###
+GET http://127.0.0.1:8000/api/recipes/?is_favorited=1
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+GET http://127.0.0.1:8000/api/recipes/?is_in_shopping_cart=1
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+GET http://127.0.0.1:8000/api/recipes/?author=Oleg
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+GET http://127.0.0.1:8000/api/recipes/?tags=breakfast
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 

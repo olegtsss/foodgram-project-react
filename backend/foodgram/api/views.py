@@ -31,6 +31,8 @@ from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
 from api.pagination import CustomPagination
+from api.permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly
+from api.filters import RecipeFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django.contrib.auth.hashers import check_password
 from rest_framework.filters import SearchFilter
@@ -47,7 +49,7 @@ class TagsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    # permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (AdminOrReadOnly,)
 
 
 class IngredientsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -55,7 +57,7 @@ class IngredientsViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    # permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (AdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ('^name',)
 
@@ -64,15 +66,11 @@ class RecipesViewSet(ModelViewSet):
     """Работа с рецептами."""
 
     queryset = Recipe.objects.all()
+    pagination_class = CustomPagination
     serializer_class = RecipeSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = (
-        'author',
-        #'is_favorited',
-        #'is_in_shopping_cart',
-        'tags'
-    )
-    #permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = (AdminOrAuthorOrReadOnly,)
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = RecipeFilter
 
 
 class DownloadShoppingCartViewSet(ModelViewSet):
@@ -94,7 +92,9 @@ class SubscribeViewSet(ModelViewSet):
     ...
 
 
-class UserViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class UserViewSet(
+    CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet
+):
     """Работа с пользователями."""
 
     queryset = User.objects.all()

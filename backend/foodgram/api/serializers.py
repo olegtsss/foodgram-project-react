@@ -12,6 +12,9 @@ from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
                             RecipeTag, ShoppingCart, Tag, User, Favorite)
 
 
+BAD_USERNAME = 'Нельзя использовать в качестве username {username}!'
+
+
 class UserSerializerExtended(ModelSerializer):
     """Сериализатор для модели User (добавляется поле is_subscribed)."""
 
@@ -51,9 +54,6 @@ class UserCreateSerializer(ModelSerializer):
     Учитывает необходимость хешиования пароля.
     """
 
-    def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
-
     class Meta:
         model = User
         fields = (
@@ -63,6 +63,14 @@ class UserCreateSerializer(ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True},
         }
+
+    def create(self, validated_data):
+        return User.objects.create_user(**validated_data)
+
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise ValidationError(BAD_USERNAME.format(username=value))
+        return value
 
 
 class SetPasswordSerializer(Serializer):
@@ -122,7 +130,7 @@ class RecipeSerializer(ModelSerializer):
         model = Recipe
         fields = (
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'name', 'text', 'cooking_time'
+            'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
 
     def get_ingredients(self, obj):
