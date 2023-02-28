@@ -15,23 +15,25 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 
-BAD_USERNAME = 'Нельзя использовать в качестве username {username}!'
-VALIDATION_ERROR = '{key}: Обязательное поле!'
-INGREDIENT_COUNT_MIN_MESSAGE = (
-    '{key1}: Количество ингредиента должно быть меньше {key2}!')
-INGREDIENT_COUNT_MAX_MESSAGE = (
-    '{key1}: Количество ингредиента должно быть больше {key2}!')
-VALIDATION_ERROR_INGREDIENT_NAME = (
-    '{key}: Ингридиенты должны быть уникальными!')
-VALIDATION_ERROR_INGREDIENT_ID = '{key}: Не корректно задан ингридиент!'
-VALIDATION_ERROR_INGREDIENT_AMOUNT = (
-    '{key}: Количество ингридиента должно быть числом!')
-VALIDATION_ERROR_TAG_ID = '{key}: Не корректно задан тег!'
-VALIDATION_ERROR_TAG_NAME = '{key}: Теги должны быть уникальными!'
+BAD_USERNAME_ERROR = {'error': 'Нельзя использовать me в качестве username!'}
+VALIDATION_ERROR = {'error': 'Не хватаает обязательного поля!'}
+INGREDIENT_COUNT_MIN_ERROR = {'error': 'Количество ингредиента слишком малое!'}
+INGREDIENT_COUNT_MAX_ERROR = {
+    'error': 'Количество ингредиента должно слишком большое!'}
+INGREDIENT_NAME_ERROR = {'error': 'Ингридиенты должны быть уникальными!'}
+INGREDIENT_ID_ERROR = {'error': 'Не корректно задан ингридиент!'}
+INGREDIENT_AMOUNT_ERROR = {
+    'error': 'Количество ингридиента должно быть числом!'}
+TAG_ID_ERROR = {'error': 'Не корректно задан тег!'}
+TAG_NAME_ERROR = {'error': 'Теги должны быть уникальными!'}
+CREATE_SHOPPING_CART_ERROR = {'error': 'Ошибка добавления в список покупок!'}
+CREATE_SHOPPING_CART_EXIST_ERROR = {
+    'error': 'Рецепт уже добавлен в список покупок!'}
 
 
 class Base64ImageField(ImageField):
     """Создание кастомного поля для сериализатора."""
+
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
@@ -94,7 +96,7 @@ class UserCreateSerializer(ModelSerializer):
 
     def validate_username(self, value):
         if value.lower() == 'me':
-            raise ValidationError(BAD_USERNAME.format(username=value))
+            raise ValidationError(BAD_USERNAME_ERROR)
         return value
 
 
@@ -193,7 +195,7 @@ class RecipeSerializer(ModelSerializer):
         """
         for key in ['ingredients', 'tags']:
             if key not in self.initial_data:
-                raise ValidationError(VALIDATION_ERROR.format(key=key))
+                raise ValidationError(VALIDATION_ERROR)
         ingredients = self.initial_data['ingredients']
         tags = self.initial_data['tags']
         ingredients_list = []
@@ -202,46 +204,26 @@ class RecipeSerializer(ModelSerializer):
         # ingredients = [{"id": 1123, "amount": 10}]
         for ingredient_amount in ingredients:
             if not isinstance(ingredient_amount['id'], int):
-                raise ValidationError(
-                    VALIDATION_ERROR_INGREDIENT_ID.format(
-                        key=ingredient_amount['id'])
-                )
+                raise ValidationError(INGREDIENT_ID_ERROR)
             ingredient = get_object_or_404(
                 Ingredient, id=ingredient_amount['id'])
             if ingredient in ingredients_list:
-                raise ValidationError(
-                    VALIDATION_ERROR_INGREDIENT_NAME.format(
-                        key=ingredient.name
-                    )
-                )
+                raise ValidationError(INGREDIENT_NAME_ERROR)
             if not isinstance(ingredient_amount['amount'], int):
-                raise ValidationError(
-                    VALIDATION_ERROR_INGREDIENT_AMOUNT.format(
-                        key=ingredient.name)
-                )
+                raise ValidationError(INGREDIENT_AMOUNT_ERROR)
             if ingredient_amount['amount'] < settings.MIN_INGREDIENT_COUNT:
-                raise ValidationError(
-                    INGREDIENT_COUNT_MIN_MESSAGE.format(
-                        key1=ingredient_amount['amount'],
-                        key2=settings.MIN_INGREDIENT_COUNT)
-                )
+                raise ValidationError(INGREDIENT_COUNT_MIN_ERROR)
             if ingredient_amount['amount'] > settings.MAX_INGREDIENT_COUNT:
-                raise ValidationError(
-                    INGREDIENT_COUNT_MAX_MESSAGE.format(
-                        key1=ingredient_amount['amount'],
-                        key2=settings.MAX_INGREDIENT_COUNT)
-                )
+                raise ValidationError(INGREDIENT_COUNT_MAX_ERROR)
             ingredients_list.append(ingredient)
         # Проверка полученных значений для поля tags
         # tags = [1, 2]
         for tag in tags:
             if not isinstance(tag, int):
-                raise ValidationError(VALIDATION_ERROR_TAG_ID.format(key=tag))
+                raise ValidationError(TAG_ID_ERROR)
             tag = get_object_or_404(Tag, id=tag)
             if tag in tags_list:
-                raise ValidationError(
-                    VALIDATION_ERROR_TAG_NAME.format(key=tag)
-                )
+                raise ValidationError(TAG_NAME_ERROR)
             tags_list.append(tag)
         # Проверки пройдены, добавляем поля в validated_data
         data['ingredients'] = ingredients
@@ -298,11 +280,43 @@ class RecipeSerializer(ModelSerializer):
         return instance
 
 
+class ShoppingCartSerializer(ModelSerializer):
+    """Сериализатор для модели ShoppingCart."""
 
+    id = PrimaryKeyRelatedField(source='recipe', read_only=True)
+    name = StringRelatedField(source='recipe', read_only=True)
+    image = SerializerMethodField()
+    cooking_time = SerializerMethodField()
 
+    class Meta:
+        model = ShoppingCart
+        fields = ('id', 'name', 'image', 'cooking_time')
 
+    def get_image(self, obj):
+        """
+        Вычисление ссылки на картинку.
+        http://foodgram.example.org/media/recipes/images/image.jpeg
+        """
+        return (
+            self.context.get(
+                'view'
+            ).request.scheme + '://' + self.context.get(
+                'view'
+            ).request.get_host() + obj.recipe.image.url
+        )
 
+    def get_cooking_time(self, obj):
+        """Вычисление cooking_time."""
+        return obj.recipe.cooking_time
 
-
-
-
+    def create(self, validated_data):
+        """Добавить рецепт в список покупок."""
+        recipe_id = self.context.get('view').request.parser_context.get(
+            'kwargs').get('recipe_id')
+        if not Recipe.objects.filter(pk=recipe_id).exists():
+            raise ValidationError(CREATE_SHOPPING_CART_ERROR)
+        user = self.context.get('request').user
+        recipe = Recipe.objects.get(id=recipe_id)
+        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+            raise ValidationError(CREATE_SHOPPING_CART_EXIST_ERROR)
+        return ShoppingCart.objects.create(user=user, recipe=recipe)

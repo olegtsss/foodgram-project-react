@@ -41,10 +41,10 @@ urlpatterns = [
     path('', include(router_v1.urls))
 ]
 
-# api/recipes/
-# api/recipes/{id}/
+
 # api/recipes/download_shopping_cart/
 # api/recipes/{id}/shopping_cart/
+
 # api/recipes/{id}/favorite/
 
 # api/users/subscriptions/

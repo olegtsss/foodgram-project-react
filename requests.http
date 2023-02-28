@@ -152,7 +152,7 @@ Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
   "ingredients": [
     {
       "id": 1123,
-      "amount": 11
+      "amount": 12
     }
   ],
   "tags": [
@@ -160,10 +160,29 @@ Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
     2
   ],
   "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
-  "name": "string3",
-  "text": "string3",
+  "name": "string4",
+  "text": "string4",
   "cooking_time": 1
 }
 ###
 DELETE  http://127.0.0.1:8000/api/recipes/14/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+
+
+
+
+
+###
+# Список покупок:
+###
+GET http://127.0.0.1:8000/api/recipes/download_shopping_cart/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+POST http://127.0.0.1:8000/api/recipes/14/shopping_cart/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+DELETE http://127.0.0.1:8000/api/recipes/14/shopping_cart/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+GET http://127.0.0.1:8000/api/recipes/2/shopping_cart/
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
