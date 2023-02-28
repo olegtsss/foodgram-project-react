@@ -293,17 +293,8 @@ class ShoppingCartSerializer(ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
     def get_image(self, obj):
-        """
-        Вычисление ссылки на картинку.
-        http://foodgram.example.org/media/recipes/images/image.jpeg
-        """
-        return (
-            self.context.get(
-                'view'
-            ).request.scheme + '://' + self.context.get(
-                'view'
-            ).request.get_host() + obj.recipe.image.url
-        )
+        """Вычисление ссылки на картинку."""
+        return obj.recipe.image.url
 
     def get_cooking_time(self, obj):
         """Вычисление cooking_time."""
@@ -320,3 +311,22 @@ class ShoppingCartSerializer(ModelSerializer):
         if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
             raise ValidationError(CREATE_SHOPPING_CART_EXIST_ERROR)
         return ShoppingCart.objects.create(user=user, recipe=recipe)
+
+
+class RecipeFavoriteSerializer(ModelSerializer):
+    """
+    Сериализатор для модели Recipe при работе с избранным.
+    """
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+        read_only_fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class FollowSerializer(ModelSerializer):
+    """Сериализатор для списка подписок."""
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'author')

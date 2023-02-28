@@ -6,7 +6,8 @@ from string import ascii_lowercase, ascii_uppercase, digits
 #from api.permissions import 
 from api.serializers import (
     IngredientSerializer, UserSerializer, UserSerializerExtended, UserCreateSerializer,
-    TagSerializer, SetPasswordSerializer, RecipeSerializer, ShoppingCartSerializer
+    TagSerializer, SetPasswordSerializer, RecipeSerializer, ShoppingCartSerializer,
+    RecipeFavoriteSerializer, FollowSerializer
 )
 from django.conf import settings
 from django.core.mail import send_mail
@@ -24,7 +25,7 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelV
 # from rest_framework_simplejwt.tokens import RefreshToken
 
 from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
-                            RecipeTag, ShoppingCart, Tag, User)
+                            RecipeTag, ShoppingCart, Tag, User, Favorite)
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -38,14 +39,21 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
+from rest_framework.views import APIView
 
 
 ERROR_MESSAGE_FOR_USERNAME = (
     'Невозможно войти с предоставленными учетными данными.')
+RECIPES_ID_ERROR = {'error': 'Не верно указан номер рецепта!'}
 DELETE_SHOPPING_CART_RECIPES_ERROR = {'error': 'Рецепта не существует!'}
 DELETE_SHOPPING_CART_ERROR = {
     'error': 'В списке покупок рецепта не существует!'}
 FILE_NAME = 'shopping_list'
+ADD_RECIPE_IN_FAVORITE_ERROR = {'error': 'Указанный рецепт не существует!'}
+RECIPE_IN_FAVORITE_EXIST_ERROR = {
+    'error': 'Указанный рецепт уже есть в избранном!'}
+RECIPE_IN_FAVORITE_NOT_EXIST_ERROR = {
+    'error': 'Указанный рецепт отсутствует в избранном!'}
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -82,6 +90,39 @@ class RecipesViewSet(ModelViewSet):
             return (IsAuthenticated(),)
         return super().get_permissions()
 
+    @action(detail=True, methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated])
+    def favorite(self, request, pk):
+        """Добавление в избранное (/api/recipes/{id}/favorite/)."""
+        try:
+            pk = int(pk)
+        except ValueError:
+            return Response(
+                RECIPES_ID_ERROR, status=status.HTTP_400_BAD_REQUEST)
+        if not Recipe.objects.filter(pk=pk).exists():
+            return Response(
+                ADD_RECIPE_IN_FAVORITE_ERROR,
+                status=status.HTTP_400_BAD_REQUEST)
+        recipe = Recipe.objects.get(pk=pk)
+        user = request.user
+        # Добавить рецепт в избранное
+        if request.method == 'POST':
+            if Favorite.objects.filter(recipe=recipe, user=user).exists():
+                return Response(
+                    RECIPE_IN_FAVORITE_EXIST_ERROR,
+                    status=status.HTTP_400_BAD_REQUEST)
+            Favorite.objects.create(user=user, recipe=recipe)
+            return Response(
+                RecipeFavoriteSerializer(recipe).data,
+                status=status.HTTP_201_CREATED)
+        # Удалить рецепт из избранного
+        if not Favorite.objects.filter(recipe=recipe, user=user).exists():
+            return Response(
+                RECIPE_IN_FAVORITE_NOT_EXIST_ERROR,
+                status=status.HTTP_400_BAD_REQUEST)
+        Favorite.objects.get(user=user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class ShoppingCartViewSet(
     CreateModelMixin, DestroyModelMixin, GenericViewSet
@@ -96,12 +137,17 @@ class ShoppingCartViewSet(
             pk=self.kwargs.get('recipe_id')).recipe_in_cart.all()
 
     def delete(self, request, recipe_id):
-        user = request.user
+        try:
+            recipe_id = int(recipe_id)
+        except ValueError:
+            return Response(
+                RECIPES_ID_ERROR, status=status.HTTP_400_BAD_REQUEST)
         if not Recipe.objects.filter(pk=recipe_id).exists():
             return Response(
                 DELETE_SHOPPING_CART_RECIPES_ERROR,
                 status=status.HTTP_400_BAD_REQUEST)
         recipe = Recipe.objects.get(pk=recipe_id)
+        user = request.user
         if not ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
             return Response(
                 DELETE_SHOPPING_CART_ERROR, status=status.HTTP_400_BAD_REQUEST)
@@ -109,12 +155,16 @@ class ShoppingCartViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FavoriteViewSet(ModelViewSet):
-    ...
+class Subscriptions(APIView):
+    """Работа со списком подписки"""
 
+    pagination_class = CustomPagination
+    permission_classes = (IsAuthenticated, )
 
-class SubscriptionsViewSet(ModelViewSet):
-    ...
+    def get(self, request):
+        follows = Follow.objects.filter(user=request.user)
+        serializer = FollowSerializer(follows, many=True)
+        return Response(serializer.data)
 
 
 class SubscribeViewSet(ModelViewSet):

@@ -173,16 +173,45 @@ Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 
 
 ###
-# Список покупок:
+# Список покупок
 ###
 GET http://127.0.0.1:8000/api/recipes/download_shopping_cart/
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
-POST http://127.0.0.1:8000/api/recipes/14/shopping_cart/
+POST http://127.0.0.1:8000/api/recipes/4/shopping_cart/
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
-DELETE http://127.0.0.1:8000/api/recipes/14/shopping_cart/
+DELETE http://127.0.0.1:8000/api/recipes/4/shopping_cart/
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
 GET http://127.0.0.1:8000/api/recipes/2/shopping_cart/
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+
+
+
+###
+# Избранное
+###
+POST http://127.0.0.1:8000/api/recipes/13/favorite/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+DELETE http://127.0.0.1:8000/api/recipes/13/favorite/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+
+
+
+###
+# Подписки
+###
+GET http://127.0.0.1:8000/api/users/subscriptions/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+POST http://127.0.0.1:8000/api/users/2/subscribe/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+###
+DELETE http://127.0.0.1:8000/api/users/2/subscribe/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
+
+
+
+
