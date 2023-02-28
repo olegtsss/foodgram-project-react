@@ -101,18 +101,13 @@ class ShoppingCartViewSet(
     def delete(self, request, recipe_id):
         user = request.user
         if not Recipe.objects.filter(pk=recipe_id).exists():
-            return JsonResponse(
+            return Response(
                 DELETE_SHOPPING_CART_RECIPES_ERROR,
-                status=status.HTTP_400_BAD_REQUEST,
-                json_dumps_params={'ensure_ascii': False}
-            )
+                status=status.HTTP_400_BAD_REQUEST)
         recipe = Recipe.objects.get(pk=recipe_id)
         if not ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
-            return JsonResponse(
-                DELETE_SHOPPING_CART_ERROR,
-                status=status.HTTP_400_BAD_REQUEST,
-                json_dumps_params={'ensure_ascii': False}
-            )
+            return Response(
+                DELETE_SHOPPING_CART_ERROR, status=status.HTTP_400_BAD_REQUEST)
         ShoppingCart.objects.get(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
