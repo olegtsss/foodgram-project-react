@@ -37,7 +37,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from django.contrib.auth.hashers import check_password
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from django.http import JsonResponse
+from django.http import HttpResponse
 
 
 ERROR_MESSAGE_FOR_USERNAME = (
@@ -45,6 +45,7 @@ ERROR_MESSAGE_FOR_USERNAME = (
 DELETE_SHOPPING_CART_RECIPES_ERROR = {'error': 'Рецепта не существует!'}
 DELETE_SHOPPING_CART_ERROR = {
     'error': 'В списке покупок рецепта не существует!'}
+FILE_NAME = 'shopping_list'
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -80,10 +81,6 @@ class RecipesViewSet(ModelViewSet):
         if self.action == 'create':
             return (IsAuthenticated(),)
         return super().get_permissions()
-
-
-class DownloadShoppingCartViewSet(ModelViewSet):
-    ...
 
 
 class ShoppingCartViewSet(
@@ -209,3 +206,30 @@ def logout(request):
     """Удаление токена текущего пользователя."""
     request.user.auth_token.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+def download_shopping_cart(request):
+    """Скачать файл со списком покупок."""
+    user = request.user
+    if user.is_anonymous:
+        return Response(
+            {'detail': 'Учетные данные не были предоставлены.'},
+            status=status.HTTP_401_UNAUTHORIZED)
+    ingredient_list = 'Cписок покупок:'
+    # RecipeIngredient (recipe) ->
+    # Recipe (recipe_in_cart - related поле, указывающее на ShoppingCart) ->
+    # ShoppingCart (user)
+    ingredients_in_cart = RecipeIngredient.objects.filter(
+        recipe__recipe_in_cart__user=request.user)
+    dictionary = {}
+    for ingredient in ingredients_in_cart:
+        dictionary[ingredient.ingredient.name] = dictionary.get(
+            ingredient.ingredient.name, 0) + ingredient.count
+    for ingredient, count in dictionary.items():
+        measurement_unit = Ingredient.objects.get(
+            name=ingredient).measurement_unit
+        ingredient_list += f'\n {ingredient} ---> {count} ({measurement_unit})'
+    response = HttpResponse(ingredient_list, 'Content-Type: application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{FILE_NAME}.pdf"'
+    return response
