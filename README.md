@@ -1,120 +1,129 @@
-#![badge](https://github.com/olegtsss/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
-# Cсылка на развернутый проект
+# Описание проекта Foodgram
 
-https://yandex.olegtsss.ru
-
-# Описание проекта YaMDb
-
-Проект YaMDb собирает отзывы пользователей на произведения.
-Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.
-Произведения делятся на категории, такие как «Книги», «Фильмы», «Музыка». Например, в категории «Книги» могут быть произведения «Винни-Пух и все-все-все» и «Марсианские хроники», а в категории «Музыка» — песня «Давеча» группы «Жуки» и вторая сюита Баха. Список категорий может быть расширен (например, можно добавить категорию «Изобразительное искусство» или «Ювелирка»).  Произведению может быть присвоен жанр из списка предустановленных (например, «Сказка», «Рок» или «Артхаус»). Добавлять произведения, категории и жанры может только администратор. Благодарные или возмущённые пользователи оставляют к произведениям текстовые отзывы и ставят произведению оценку в диапазоне от одного до десяти (целое число); из пользовательских оценок формируется усреднённая оценка произведения — рейтинг (целое число). На одно произведение пользователь может оставить только один отзыв. Пользователи могут оставлять комментарии к отзывам. Добавлять отзывы, комментарии и ставить оценки могут только аутентифицированные пользователи.
+Cайт Foodgram, «Продуктовый помощник» - это онлайн-сервис, на котором пользователи могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
 
 # Используемые технологии
 
-Python 3.7, Django 2.2, Django ORM, Django REST Framework, Postgresql, Simple-JWT
+Python 3.7, Django 2.2, Django ORM, Django REST Framework, Postgresql
 
 ## Как запустить проект:
 - Клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone https://github.com/olegtsss/yamdb_final.git
-cd yamdb_final/infra
+git clone https://github.com/olegtsss/foodgram-project-react.git
 ```
-
-- Запуск приложения в контейнерах:
-
+cd foodgram-project-react
 ```
-docker-compose up -d
+- Cоздать и активировать виртуальное окружение:
 ```
-
+python -m venv venv
+```
+. venv/Scripts/activate
+```
+- Обновить менеджер пакетов:
+python -m pip install --upgrade pip
+```
+- Установить зависимости из файла requirements.txt:
+```
+pip install -r requirements.txt
+```
 - Выполнить миграции:
-
 ```
-docker-compose exec web python manage.py migrate
+python backend/foodgram/manage.py migrate
 ```
-
-- Cоздать суперпользователя:
-
+- Загрузить тестовую выборку (опционально):
 ```
-docker-compose exec web python manage.py createsuperuser
+python backend/foodgram/manage.py import_into_db
 ```
-
-- Cобрать статику:
-
+- Запустить проект:
 ```
-docker-compose exec web python manage.py collectstatic --no-input
+python backend/foodgram/manage.py runserver
 ```
 
 ## Настроены эндпоинты:
 
 ```
-    api/v1/categories/ (GET, PUT, PATCH, DELETE): категории (типы) произведений.
-    api/v1/genres/ (GET, PUT, PATCH, DELETE): жанры произведений.
-    api/v1/titles/ (GET, PUT, PATCH, DELETE): произведения, к которым пишут отзывы.
-    api/v1/titles/{title_id}/reviews/ (GET, PUT, PATCH, DELETE): отзывы на произведения.
-    api/v1/titles/{title_id}/reviews/{review_id}/comments/ (GET, PUT, PATCH, DELETE): комментарии к отзывам.
-    api/v1/users/ (GET, PUT, PATCH, DELETE): управление пользователями. 
-    api/v1/auth/signup/ (POST): регистрация.
-    api/v1/auth/token/ (POST):  получить токен.
-    api/v1/users/me/ (GET, PATCH): управление своими пользовательскими данными.
+    api/users/ (GET, POST): список и регистрация пользователей
+    api/users/{id}/ (GET): профиль пользователя
+    api/users/me/ (GET): текущий пользователь
+    api/users/set_password/ (POST): изменение пароля пользователя
+    api/auth/token/login/ (POST): получение токена авторизации
+    api/auth/token/logout/ (POST): удаление токена авторизации
+    api/tags/ (GET): список тегов
+    api/tags/{id}/ (GET): получение тега
+    api/recipes/ (GET, POST): список или создание рецептов
+    api/recipes/{id}/ (GET, PATCH, DELETE): получение, обновление или удаление рецепта
+    api/recipes/download_shopping_cart/ (GET): список покупок
+    api/recipes/{id}/shopping_cart/ (POST, DELETE): добавление или удаление рецепта из списка покупок
+    api/recipes/{id}/favorite/ (POST, DELETE): добавление или удаление рецепта из избранного
+    api/users/subscriptions/ (GET): мои подписки
+    api/users/{id}/subscribe/ (POST, DELETE): подписаться или отписаться от пользователя
+    api/ingredients/ (GET): список ингредиентов
+    api/ingredients/{id}/ (GET): получение ингредиента
 ```
 
 ## Примеры запросов:
 
 ```
-    POST http://127.0.0.1/api/v1/auth/signup/
+    GET http://127.0.0.1:8000/api/users/?limit=2
+
+    POST http://127.0.0.1:8000/api/auth/token/login/
     Content-Type: application/json
 
     {
-        "username": "user",
-        "email": "user@user.ru"
+        "password": "secret",
+        "email": "secret@secret.secret"
     }
 
-    POST http://127.0.0.1/api/v1/auth/token/
+    POST http://127.0.0.1:8000/api/users/set_password/
     Content-Type: application/json
+    Authorization: Token secret
 
     {
-        "username": "user",
-        "confirmation_code": "Mdgdr..."
+        "new_password": "123",
+        "current_password": "321"
     }
 
-    POST http://127.0.0.1/api/v1/categories/
-    Authorization: Bearer eyJ0eX...
+    GET http://127.0.0.1:8000/api/ingredients/?search=абрикосовый
+
+    GET http://127.0.0.1:8000/api/recipes/?is_favorited=1
+    Authorization: Token secret
+
+    GET http://127.0.0.1:8000/api/recipes/?is_in_shopping_cart=1
+    Authorization: Token secret
+
+    POST http://127.0.0.1:8000/api/recipes/
     Content-Type: application/json
+    Authorization: Token secret
 
     {
-        "name": "Программирование",
-        "slug": "programme"
+        "ingredients": [
+            {
+                "id": 1123,
+                "amount": 14
+            }
+        ],
+        "tags": [
+            1,
+            2
+        ],
+        "image": "data:image/png;base64,iVB...g==",
+        "name": "string",
+        "text": "string",
+        "cooking_time": 1
     }
 
-    GET http://127.0.0.1/api/v1/users/
-    Authorization: Bearer eyJ0eXAiO...
+    DELETE http://127.0.0.1:8000/api/recipes/5/favorite/
+    Authorization: Token secret
 
-    GET http://127.0.0.1/api/v1/users/Test/
-    Authorization: Bearer eyJ0eXAiO...
-
-    PATCH http://127.0.0.1/api/v1/users/Test/
-    Authorization: Bearer eyJ0eXAiO...
-    Content-Type: application/json
-
-    {
-        "bio": "Я не работаю",
-        "role": "user"
-    }
-    
-    http://127.0.0.1/api/v1/users/me/
-    Authorization: Bearer eyJ0eXAiO
-    Content-Type: application/json
-
-    {
-        "bio": "Ничего интересного"
-    }
+    GET http://127.0.0.1:8000/api/users/subscriptions/?recipes_limit=1&limit=1
+    Authorization: Token secret
 ```
 
 ## Документация к API:
 
 ```
-    http://127.0.0.1/redoc/
+    http://127.0.0.1/api/docs/
 ```
 
 ## Шаблон наполнения env-файла:
@@ -126,18 +135,19 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 DB_HOST=db
 DB_PORT=5432
+SECRET_KEY='secret'
+DEBUG=True
+ALLOWED_HOSTS='foodgram.olegtsss.ru'
+NEED_SQLITE=False
 ```
 
 # Разработчики
 
-[olegtsss](https://github.com/olegtsss): работа с токенами, модели, сериализаторы, админка.
+[olegtsss](https://github.com/olegtsss): backend.
 
-[duckdanil](https://github.com/duckdanil): контроллеры.
+[yandex](https://ya.ru): frontend.
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray)
 ![Postgresql](https://img.shields.io/badge/%D0%91%D0%B0%D0%B7%D0%B0%20%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85-postgresql-brightgreen?style=for-the-badge)
 ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=whte)
-
-
-python manage.py import_into_db

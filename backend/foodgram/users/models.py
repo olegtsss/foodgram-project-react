@@ -47,7 +47,7 @@ class Follow(models.Model):
     class Meta:
         ordering = ('pk',)
         verbose_name = 'подписку'
-        verbose_name_plural = '9. Подписки'
+        verbose_name_plural = '2. Подписки'
         constraints = [
             models.CheckConstraint(
                 check=~models.Q(user=models.F('author')),

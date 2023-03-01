@@ -1,7 +1,6 @@
-from django.conf import settings
 from django.contrib.auth.hashers import check_password
-from django.db.models import Avg
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -44,7 +43,6 @@ RECIPE_IN_FAVORITE_EXIST_ERROR = {
     'error': 'Указанный рецепт уже есть в избранном!'}
 RECIPE_IN_FAVORITE_NOT_EXIST_ERROR = {
     'error': 'Указанный рецепт отсутствует в избранном!'}
-FOLLOW_AUTHOR_NOT_EXIST_ERROR = {'detail': 'Страница не найдена.'}
 FOLLOW_NOT_EXIST_ERROR = {'error': 'Подписка на автора не существует!'}
 
 
@@ -172,22 +170,13 @@ class Subscribe(APIView):
 
     permission_classes = [IsAuthenticated, ]
 
-    def return_author(self, id_author):
-        # Проверка делается в контроллере, иначе при несуществующем
-        # User отработает ошибка constraints в Модели
-        if not User.objects.filter(pk=id_author).exists():
-            return Response(
-                FOLLOW_AUTHOR_NOT_EXIST_ERROR,
-                status=status.HTTP_404_NOT_FOUND)
-        return User.objects.get(pk=id_author)
-
     def post(self, request, id_author):
-        """Подписка (метод POST)"""
+        """Подписка (метод POST)."""
         data = {
             'user': request.user.id,
             'author': id_author
         }
-        author = self.return_author(id_author)
+        author = get_object_or_404(User, pk=id_author)
         # Сериализатор для сохранения подписки в модель Follow
         serializer_saver = FollowSerializerSuscribe(
             data=data, context={'request': request})
@@ -202,8 +191,8 @@ class Subscribe(APIView):
             serializer_saver.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id_author):
-        """Отписка (метод DELETE)"""
-        author = self.return_author(id_author)
+        """Отписка (метод DELETE)."""
+        author = get_object_or_404(User, pk=id_author)
         if not Follow.objects.filter(user=request.user, author=author):
             return Response(
                 FOLLOW_NOT_EXIST_ERROR, status=status.HTTP_400_BAD_REQUEST)

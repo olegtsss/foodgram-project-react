@@ -13,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
         'last_name',
         'password',
         'is_staff',
-        'date_joined',
+        'date_joined'
     )
     list_editable = ('first_name', 'last_name', 'is_staff', 'password')
     search_fields = ('username', 'email')
@@ -25,7 +25,7 @@ class FollowAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
-        'author',
+        'author'
     )
     list_editable = ('user', 'author')
     search_fields = ('user', 'author')

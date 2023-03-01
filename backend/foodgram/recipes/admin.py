@@ -10,7 +10,7 @@ class TagAdmin(admin.ModelAdmin):
         'pk',
         'name',
         'color',
-        'slug',
+        'slug'
     )
     list_editable = ('name', 'color')
     search_fields = ('name',)
@@ -22,10 +22,11 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'name',
-        'measurement_unit',
+        'measurement_unit'
     )
     list_editable = ('name', 'measurement_unit')
     search_fields = ('name',)
+    list_filter = ('name',)
 
 
 @admin.register(Recipe)
@@ -37,9 +38,16 @@ class RecipeAdmin(admin.ModelAdmin):
         'author',
         'text',
         'cooking_time',
+        'count_favorites'
     )
     list_editable = ('name', 'text', 'cooking_time')
     search_fields = ('name',)
+    list_filter = ('author', 'name', 'tags')
+
+    def count_favorites(self, obj):
+        return obj.recipe_in_favorite.count()
+
+    count_favorites.short_description = 'В избранном'
 
 
 @admin.register(RecipeIngredient)
@@ -59,7 +67,7 @@ class RecipeTagAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'recipe',
-        'tag',
+        'tag'
     )
     list_editable = ('recipe', 'tag')
     search_fields = ('recipe', 'tag')
@@ -70,7 +78,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
-        'recipe',
+        'recipe'
     )
     list_editable = ('user', 'recipe')
     search_fields = ('user', 'recipe')
@@ -81,7 +89,7 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
-        'recipe',
+        'recipe'
     )
     list_editable = ('user', 'recipe')
     search_fields = ('user', 'recipe')
