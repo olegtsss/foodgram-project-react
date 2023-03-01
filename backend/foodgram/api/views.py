@@ -40,6 +40,7 @@ from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import HttpResponse
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 
 
 ERROR_MESSAGE_FOR_USERNAME = (
@@ -155,20 +156,38 @@ class ShoppingCartViewSet(
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class Subscriptions(APIView):
-    """Работа со списком подписки"""
+class Subscriptions(ListAPIView):
+    """Работа со списком подписки."""
 
+    # Переопределяем поля класса ListAPIView -> GenericAPIView
     pagination_class = CustomPagination
     permission_classes = (IsAuthenticated, )
 
     def get(self, request):
-        follows = Follow.objects.filter(user=request.user)
-        serializer = FollowSerializer(follows, many=True)
-        return Response(serializer.data)
+        following = []
+        for object in Follow.objects.filter(user=request.user):
+            following.append(object.author)
+        # Для работы пагинации используем методы класса ListAPIView
+        page = self.paginate_queryset(following)
+        serializer = FollowSerializer(
+            page, many=True, context={'request': request}
+        )
+        # Для работы пагинации используем методы класса ListAPIView
+        return self.get_paginated_response(serializer.data)
 
 
-class SubscribeViewSet(ModelViewSet):
-    ...
+class SubscribeViewSet(CreateModelMixin, DestroyModelMixin, GenericViewSet):
+    """Работа с подпиской / отпиской."""
+
+    # serializer_class = FollowSerializer
+    # pagination_class = CustomPagination
+    # permission_classes = (IsAuthenticated,)
+    queryset = User.objects.all()
+    serializer_class = UserCreateSerializer
+
+    # def get_queryset(self):
+    #     return User.objects.get(
+    #         pk=self.kwargs.get('user_id')).following.all()
 
 
 class UserViewSet(

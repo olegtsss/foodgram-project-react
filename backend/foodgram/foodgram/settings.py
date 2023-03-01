@@ -115,6 +115,8 @@ MIN_INGREDIENT_COUNT = 0
 MAX_INGREDIENT_COUNT = 999999999
 # Сообщение для некорректно указанного количества ингридиента
 INGREDIENT_COUNT_MESSAGE = 'Указано не корректное количество.'
+# Ограничение для работы пагинатора CustomPagination
+PAGE_SIZE = 50
 
 # Работа с токенами
 REST_FRAMEWORK = {

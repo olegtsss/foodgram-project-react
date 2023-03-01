@@ -50,6 +50,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'name',
+        'author',
         'text',
         'cooking_time',
     )

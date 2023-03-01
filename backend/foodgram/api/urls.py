@@ -33,8 +33,3 @@ urlpatterns = [
         download_shopping_cart, name='download_shopping_cart'),
     path('', include(router_v1.urls))
 ]
-
-
-# api/users/subscriptions/
-# api/users/{id}/subscribe/
-

@@ -29,6 +29,8 @@ TAG_NAME_ERROR = {'error': 'Теги должны быть уникальным�
 CREATE_SHOPPING_CART_ERROR = {'error': 'Ошибка добавления в список покупок!'}
 CREATE_SHOPPING_CART_EXIST_ERROR = {
     'error': 'Рецепт уже добавлен в список покупок!'}
+LIMIT_NAME_ERROR = {
+    'error': 'Параметр запроса recipes_limit должен быть целым числом!'}
 
 
 class Base64ImageField(ImageField):
@@ -324,9 +326,57 @@ class RecipeFavoriteSerializer(ModelSerializer):
         read_only_fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FollowSerializer(ModelSerializer):
-    """Сериализатор для списка подписок."""
+class RecipeForFollowSerializer(ModelSerializer):
+    """
+    Сериализатор встроенной секции Recipe.
+    (для сериализатора FollowSerializer)
+    """
 
     class Meta:
-        model = Follow
-        fields = ('user', 'author')
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class FollowSerializer(UserSerializerExtended):
+    """Сериализатор для списка подписок."""
+
+    recipes = SerializerMethodField()
+    recipes_count = SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name',
+            'is_subscribed', 'recipes', 'recipes_count')
+
+    def get_is_subscribed(self, obj):
+        """
+        Функция переопределена.
+        Так как возникает проблема с recipes_limit и
+        self.context.get('view').request.user
+        """
+        ...
+
+    def get_recipes(self, obj):
+        """
+        Вычисление вложенной секции recipes.
+        Модель Recipe имеет поле author.
+        (ForeignKey в модель User при этом ее related_name=recipes)
+        """
+        # Все рецепты, автором которых является интересующий User
+        recipes = Recipe.objects.filter(author=obj)
+        # GET query parameter <recipes_limit> -
+        # количество объектов во вложенной секции recipes
+        recipes_limit = self.context.get(
+            'request').query_params.get('recipes_limit')
+        if recipes_limit:
+            try:
+                recipes_limit = int(recipes_limit)
+            except ValueError:
+                raise ValidationError(LIMIT_NAME_ERROR)
+            recipes = recipes[:recipes_limit]
+        return RecipeForFollowSerializer(recipes, many=True).data
+
+    def get_recipes_count(self, obj):
+        """Вычисление поля recipes_count."""
+        return Recipe.objects.filter(author=obj).count()
