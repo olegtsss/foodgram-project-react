@@ -4,7 +4,6 @@ from django.core.management.base import BaseCommand
 
 from recipes.models import Ingredient
 
-
 HELP_MESSAGE = 'Импорт данных из data/ingredients.csv'
 START_MESSAGE = 'Начинаем импорт...'
 STOP_MESSAGE = 'Импорт закончен...'

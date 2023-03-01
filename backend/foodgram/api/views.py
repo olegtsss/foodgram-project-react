@@ -1,46 +1,35 @@
-import random
-from smtplib import SMTPResponseException
-from string import ascii_lowercase, ascii_uppercase, digits
-
-# from api.filters import TitleFilter
-#from api.permissions import 
-from api.serializers import (
-    IngredientSerializer, UserSerializer, UserSerializerExtended, UserCreateSerializer,
-    TagSerializer, SetPasswordSerializer, RecipeSerializer, ShoppingCartSerializer,
-    RecipeFavoriteSerializer, FollowSerializer
-)
 from django.conf import settings
-from django.core.mail import send_mail
+from django.contrib.auth.hashers import check_password
 from django.db.models import Avg
-from django.shortcuts import get_object_or_404
-#from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet, ReadOnlyModelViewSet
-# from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
+                                     ReadOnlyModelViewSet)
 
-from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
-                            RecipeTag, ShoppingCart, Tag, User, Favorite)
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.pagination import PageNumberPagination
+from api.filters import RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly
-from api.filters import RecipeFilter
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
-from django.contrib.auth.hashers import check_password
-from rest_framework.filters import SearchFilter
-from django_filters.rest_framework import DjangoFilterBackend
-from django.http import HttpResponse
-from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
+from api.serializers import (FollowSerializer, FollowSerializerSuscribe,
+                             IngredientSerializer, RecipeFavoriteSerializer,
+                             RecipeSerializer, SetPasswordSerializer,
+                             ShoppingCartSerializer, TagSerializer,
+                             UserCreateSerializer, UserSerializer,
+                             UserSerializerExtended)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
+from users.models import Follow, User
 
 
 ERROR_MESSAGE_FOR_USERNAME = (
@@ -55,6 +44,8 @@ RECIPE_IN_FAVORITE_EXIST_ERROR = {
     'error': 'Указанный рецепт уже есть в избранном!'}
 RECIPE_IN_FAVORITE_NOT_EXIST_ERROR = {
     'error': 'Указанный рецепт отсутствует в избранном!'}
+FOLLOW_AUTHOR_NOT_EXIST_ERROR = {'detail': 'Страница не найдена.'}
+FOLLOW_NOT_EXIST_ERROR = {'error': 'Подписка на автора не существует!'}
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -176,18 +167,48 @@ class Subscriptions(ListAPIView):
         return self.get_paginated_response(serializer.data)
 
 
-class SubscribeViewSet(CreateModelMixin, DestroyModelMixin, GenericViewSet):
+class Subscribe(APIView):
     """Работа с подпиской / отпиской."""
 
-    # serializer_class = FollowSerializer
-    # pagination_class = CustomPagination
-    # permission_classes = (IsAuthenticated,)
-    queryset = User.objects.all()
-    serializer_class = UserCreateSerializer
+    permission_classes = [IsAuthenticated, ]
 
-    # def get_queryset(self):
-    #     return User.objects.get(
-    #         pk=self.kwargs.get('user_id')).following.all()
+    def return_author(self, id_author):
+        # Проверка делается в контроллере, иначе при несуществующем
+        # User отработает ошибка constraints в Модели
+        if not User.objects.filter(pk=id_author).exists():
+            return Response(
+                FOLLOW_AUTHOR_NOT_EXIST_ERROR,
+                status=status.HTTP_404_NOT_FOUND)
+        return User.objects.get(pk=id_author)
+
+    def post(self, request, id_author):
+        """Подписка (метод POST)"""
+        data = {
+            'user': request.user.id,
+            'author': id_author
+        }
+        author = self.return_author(id_author)
+        # Сериализатор для сохранения подписки в модель Follow
+        serializer_saver = FollowSerializerSuscribe(
+            data=data, context={'request': request})
+        if serializer_saver.is_valid():
+            serializer_saver.save()
+            # Сериализатор для ответа
+            serializer_printer = FollowSerializer(
+                author, context={'request': request})
+            return Response(
+                serializer_printer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serializer_saver.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id_author):
+        """Отписка (метод DELETE)"""
+        author = self.return_author(id_author)
+        if not Follow.objects.filter(user=request.user, author=author):
+            return Response(
+                FOLLOW_NOT_EXIST_ERROR, status=status.HTTP_400_BAD_REQUEST)
+        Follow.objects.get(user=request.user, author=author).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserViewSet(

@@ -209,13 +209,11 @@ Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 GET http://127.0.0.1:8000/api/users/subscriptions/?recipes_limit=1&limit=1
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
-POST http://127.0.0.1:8000/api/users/10/subscribe/
+POST http://127.0.0.1:8000/api/users/3/subscribe/
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
 ###
-DELETE http://127.0.0.1:8000/api/users/10/subscribe/
+POST http://127.0.0.1:8000/api/users/3/subscribe/?recipes_limit=1
 Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a
-
-
-
-
-# api/users/{id}/subscribe/
+###
+DELETE http://127.0.0.1:8000/api/users/3/subscribe/
+Authorization: Token 7018a6e6ce04ae3542c95abd631e0583ff3b9f6a

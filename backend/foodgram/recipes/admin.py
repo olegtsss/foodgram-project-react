@@ -1,24 +1,7 @@
 from django.contrib import admin
 
-from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
-                            RecipeTag, ShoppingCart, Tag, User, Favorite)
-
-
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = (
-        'pk',
-        'username',
-        'email',
-        'first_name',
-        'last_name',
-        'password',
-        'is_staff',
-        'date_joined',
-    )
-    list_editable = ('first_name', 'last_name', 'is_staff', 'password')
-    search_fields = ('username', 'email')
-    empty_value_display = '-пусто-'
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            RecipeTag, ShoppingCart, Tag)
 
 
 @admin.register(Tag)
@@ -49,6 +32,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
+        'pub_date',
         'name',
         'author',
         'text',
@@ -101,14 +85,3 @@ class FavoriteAdmin(admin.ModelAdmin):
     )
     list_editable = ('user', 'recipe')
     search_fields = ('user', 'recipe')
-
-
-@admin.register(Follow)
-class FollowAdmin(admin.ModelAdmin):
-    list_display = (
-        'pk',
-        'user',
-        'author',
-    )
-    list_editable = ('user', 'author')
-    search_fields = ('user', 'author')

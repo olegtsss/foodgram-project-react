@@ -1,18 +1,16 @@
-import datetime as dt
-
-from django.conf import settings
-from django.shortcuts import get_object_or_404
-from rest_framework.serializers import (CharField, EmailField, IntegerField,
-                                        ModelSerializer, RegexField,
-                                        PrimaryKeyRelatedField, ImageField,
-                                        Serializer, StringRelatedField, SlugRelatedField,
-                                        ValidationError, Field, SerializerMethodField)
-
-from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
-                            RecipeTag, ShoppingCart, Tag, User, Favorite)
 import base64
-from django.core.files.base import ContentFile
+
 from django.conf import settings
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
+from rest_framework.serializers import (CharField, ImageField, ModelSerializer,
+                                        PrimaryKeyRelatedField, Serializer,
+                                        SerializerMethodField,
+                                        StringRelatedField, ValidationError)
+
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            RecipeTag, ShoppingCart, Tag)
+from users.models import Follow, User
 
 
 BAD_USERNAME_ERROR = {'error': 'Нельзя использовать me в качестве username!'}
@@ -31,6 +29,8 @@ CREATE_SHOPPING_CART_EXIST_ERROR = {
     'error': 'Рецепт уже добавлен в список покупок!'}
 LIMIT_NAME_ERROR = {
     'error': 'Параметр запроса recipes_limit должен быть целым числом!'}
+FOLLOW_EXIST_ERROR = {'error': 'Подписка на автора уже существует!'}
+FOLLOW_YOURSELF_ERROR = {'error': 'Нельзя подписаться на себя самого!'}
 
 
 class Base64ImageField(ImageField):
@@ -342,6 +342,7 @@ class FollowSerializer(UserSerializerExtended):
 
     recipes = SerializerMethodField()
     recipes_count = SerializerMethodField()
+    # Переопределяем поле, иначе получаем null
 
     class Meta:
         model = User
@@ -352,10 +353,11 @@ class FollowSerializer(UserSerializerExtended):
     def get_is_subscribed(self, obj):
         """
         Функция переопределена.
-        Так как возникает проблема с recipes_limit и
-        self.context.get('view').request.user
+        Вместо self.context.get('view').request
+        Используется self.context['request'].user
         """
-        ...
+        return Follow.objects.filter(
+            user=self.context['request'].user, author=obj).exists()
 
     def get_recipes(self, obj):
         """
@@ -380,3 +382,20 @@ class FollowSerializer(UserSerializerExtended):
     def get_recipes_count(self, obj):
         """Вычисление поля recipes_count."""
         return Recipe.objects.filter(author=obj).count()
+
+
+class FollowSerializerSuscribe(ModelSerializer):
+    """Сериализатор для создания подписок / отписок."""
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'author')
+
+    def validate_author(self, value):
+        if value == self.context['request'].user:
+            raise ValidationError(FOLLOW_YOURSELF_ERROR)
+        if Follow.objects.filter(
+            user=self.context['request'].user, author=value
+        ).exists():
+            raise ValidationError(FOLLOW_EXIST_ERROR)
+        return value

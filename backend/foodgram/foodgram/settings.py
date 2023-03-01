@@ -1,6 +1,4 @@
 import os
-from datetime import timedelta
-from pathlib import Path
 
 # from dotenv import load_dotenv
 
@@ -19,7 +17,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Приложение users
+    'users.apps.UsersConfig',
+    # Приложение api
     'api.apps.ApiConfig',
+    # Приложение recipes
     'recipes.apps.RecipesConfig',
     'rest_framework',
     'django_filters',
@@ -81,7 +83,17 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 MEDIA_URL = 'http://localhost:8000/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-AUTH_USER_MODEL = 'recipes.User'
+AUTH_USER_MODEL = 'users.User'
+
+# Работа с токенами
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
 # Максимальная длина адреса электронной почты
 MAX_LENGTH_EMAIL = 254
@@ -117,16 +129,3 @@ MAX_INGREDIENT_COUNT = 999999999
 INGREDIENT_COUNT_MESSAGE = 'Указано не корректное количество.'
 # Ограничение для работы пагинатора CustomPagination
 PAGE_SIZE = 50
-
-# Работа с токенами
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    #'DEFAULT_FILTER_BACKENDS': [
-    #    'django_filters.rest_framework.DjangoFilterBackend',
-    #],
-}
