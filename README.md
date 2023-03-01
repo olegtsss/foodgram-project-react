@@ -11,31 +11,42 @@ Python 3.7, Django 2.2, Django ORM, Django REST Framework, Postgresql
 
 ```
 git clone https://github.com/olegtsss/foodgram-project-react.git
-```
 cd foodgram-project-react
 ```
+
 - Cоздать и активировать виртуальное окружение:
+
 ```
 python -m venv venv
-```
 . venv/Scripts/activate
 ```
+
 - Обновить менеджер пакетов:
+
+```
 python -m pip install --upgrade pip
 ```
+
 - Установить зависимости из файла requirements.txt:
+
 ```
 pip install -r requirements.txt
 ```
+
 - Выполнить миграции:
+
 ```
 python backend/foodgram/manage.py migrate
 ```
+
 - Загрузить тестовую выборку (опционально):
+
 ```
 python backend/foodgram/manage.py import_into_db
 ```
+
 - Запустить проект:
+
 ```
 python backend/foodgram/manage.py runserver
 ```
