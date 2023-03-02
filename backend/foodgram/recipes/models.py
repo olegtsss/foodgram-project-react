@@ -10,11 +10,13 @@ class Tag(models.Model):
 
     name = models.CharField(
         'Наименование тега',
+        unique=True,
         max_length=settings.MAX_LENGTH_TAG_NAME,
         help_text='Введите наименование тега'
     )
     color = models.CharField(
         'Цвет тега',
+        unique=True,
         max_length=settings.MAX_LENGTH_TAG_COLOR,
         help_text='Введите цветовой HEX-код (например, #49B64E)'
     )
