@@ -187,7 +187,7 @@ class RecipeSerializer(ModelSerializer):
                 raise ValidationError(VALIDATION_ERROR)
         ingredients = self.initial_data['ingredients']
         tags = self.initial_data['tags']
-        ingredients_list = {}
+        ingredients_list = set()
         # Проверка полученных значений для поля ingredients
         # ingredients = [{"id": 1123, "amount": 10}]
         for ingredient_amount in ingredients:
@@ -203,7 +203,7 @@ class RecipeSerializer(ModelSerializer):
                 raise ValidationError(INGREDIENT_COUNT_MIN_ERROR)
             if ingredient_amount['amount'] > settings.MAX_INGREDIENT_COUNT:
                 raise ValidationError(INGREDIENT_COUNT_MAX_ERROR)
-            ingredients_list.append(ingredient)
+            ingredients_list.add(ingredient)
         # Проверка полученных значений для поля tags
         # tags = [1, 2]
         for tag in tags:
