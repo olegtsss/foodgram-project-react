@@ -17,6 +17,14 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import (GenericViewSet, ModelViewSet,
                                      ReadOnlyModelViewSet)
 
+from api.constants import (ADD_RECIPE_IN_FAVORITE_ERROR,
+                           DELETE_SHOPPING_CART_ERROR,
+                           DELETE_SHOPPING_CART_RECIPES_ERROR,
+                           ERROR_MESSAGE_FOR_USERNAME, FILE_NAME,
+                           FOLLOW_NOT_EXIST_ERROR,
+                           RECIPE_IN_FAVORITE_EXIST_ERROR,
+                           RECIPE_IN_FAVORITE_NOT_EXIST_ERROR,
+                           RECIPES_ID_ERROR)
 from api.filters import RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly
@@ -29,21 +37,6 @@ from api.serializers import (FollowSerializer, FollowSerializerSuscribe,
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import Follow, User
-
-
-ERROR_MESSAGE_FOR_USERNAME = (
-    'Невозможно войти с предоставленными учетными данными.')
-RECIPES_ID_ERROR = {'error': 'Не верно указан номер рецепта!'}
-DELETE_SHOPPING_CART_RECIPES_ERROR = {'error': 'Рецепта не существует!'}
-DELETE_SHOPPING_CART_ERROR = {
-    'error': 'В списке покупок рецепта не существует!'}
-FILE_NAME = 'shopping_list'
-ADD_RECIPE_IN_FAVORITE_ERROR = {'error': 'Указанный рецепт не существует!'}
-RECIPE_IN_FAVORITE_EXIST_ERROR = {
-    'error': 'Указанный рецепт уже есть в избранном!'}
-RECIPE_IN_FAVORITE_NOT_EXIST_ERROR = {
-    'error': 'Указанный рецепт отсутствует в избранном!'}
-FOLLOW_NOT_EXIST_ERROR = {'error': 'Подписка на автора не существует!'}
 
 
 class TagsViewSet(ReadOnlyModelViewSet):

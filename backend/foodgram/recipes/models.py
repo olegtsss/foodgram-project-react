@@ -88,7 +88,8 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Картинка',
-        upload_to='static/',
+        # "image": "http://127.0.0.1:8000/media/recipes/image/temp.png"
+        upload_to='recipes/image/',
         help_text='Выберете картинку для рецепта'
     )
     name = models.CharField(
@@ -241,3 +242,6 @@ class Favorite(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'recipe'], name='unique_favorite')
         ]
+
+    def __str__(self):
+        return f'{self.user.username}, {self.recipe.name}'

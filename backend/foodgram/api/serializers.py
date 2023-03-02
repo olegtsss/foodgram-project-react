@@ -3,34 +3,21 @@ import base64
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            RecipeTag, ShoppingCart, Tag)
 from rest_framework.serializers import (CharField, ImageField, ModelSerializer,
                                         PrimaryKeyRelatedField, Serializer,
                                         SerializerMethodField,
                                         StringRelatedField, ValidationError)
 
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            RecipeTag, ShoppingCart, Tag)
+from api.constants import (BAD_USERNAME_ERROR, CREATE_SHOPPING_CART_ERROR,
+                           CREATE_SHOPPING_CART_EXIST_ERROR,
+                           FOLLOW_EXIST_ERROR, FOLLOW_YOURSELF_ERROR,
+                           INGREDIENT_AMOUNT_ERROR, INGREDIENT_COUNT_MAX_ERROR,
+                           INGREDIENT_COUNT_MIN_ERROR, INGREDIENT_ID_ERROR,
+                           INGREDIENT_NAME_ERROR, LIMIT_NAME_ERROR,
+                           TAG_ID_ERROR, TAG_NAME_ERROR, VALIDATION_ERROR)
 from users.models import Follow, User
-
-
-BAD_USERNAME_ERROR = {'error': 'Нельзя использовать me в качестве username!'}
-VALIDATION_ERROR = {'error': 'Не хватаает обязательного поля!'}
-INGREDIENT_COUNT_MIN_ERROR = {'error': 'Количество ингредиента слишком малое!'}
-INGREDIENT_COUNT_MAX_ERROR = {
-    'error': 'Количество ингредиента должно слишком большое!'}
-INGREDIENT_NAME_ERROR = {'error': 'Ингридиенты должны быть уникальными!'}
-INGREDIENT_ID_ERROR = {'error': 'Не корректно задан ингридиент!'}
-INGREDIENT_AMOUNT_ERROR = {
-    'error': 'Количество ингридиента должно быть числом!'}
-TAG_ID_ERROR = {'error': 'Не корректно задан тег!'}
-TAG_NAME_ERROR = {'error': 'Теги должны быть уникальными!'}
-CREATE_SHOPPING_CART_ERROR = {'error': 'Ошибка добавления в список покупок!'}
-CREATE_SHOPPING_CART_EXIST_ERROR = {
-    'error': 'Рецепт уже добавлен в список покупок!'}
-LIMIT_NAME_ERROR = {
-    'error': 'Параметр запроса recipes_limit должен быть целым числом!'}
-FOLLOW_EXIST_ERROR = {'error': 'Подписка на автора уже существует!'}
-FOLLOW_YOURSELF_ERROR = {'error': 'Нельзя подписаться на себя самого!'}
 
 
 class Base64ImageField(ImageField):
@@ -200,8 +187,7 @@ class RecipeSerializer(ModelSerializer):
                 raise ValidationError(VALIDATION_ERROR)
         ingredients = self.initial_data['ingredients']
         tags = self.initial_data['tags']
-        ingredients_list = []
-        tags_list = []
+        ingredients_list = {}
         # Проверка полученных значений для поля ingredients
         # ingredients = [{"id": 1123, "amount": 10}]
         for ingredient_amount in ingredients:
@@ -224,9 +210,9 @@ class RecipeSerializer(ModelSerializer):
             if not isinstance(tag, int):
                 raise ValidationError(TAG_ID_ERROR)
             tag = get_object_or_404(Tag, id=tag)
-            if tag in tags_list:
+            # if tag in tags_list:
+            if len(tags) > len(set(tags)):
                 raise ValidationError(TAG_NAME_ERROR)
-            tags_list.append(tag)
         # Проверки пройдены, добавляем поля в validated_data
         data['ingredients'] = ingredients
         data['tags'] = tags
@@ -237,19 +223,27 @@ class RecipeSerializer(ModelSerializer):
         Вспомонательная функция. Создает объект в модели RecipeIngredient.
         ingredients = [{"id": 1123, "amount": 10}]
         """
-        for ingredient_volume in ingredients:
-            RecipeIngredient.objects.create(
+        RecipeIngredient.objects.bulk_create(
+            RecipeIngredient(
                 ingredient=Ingredient.objects.get(pk=ingredient_volume['id']),
-                count=ingredient_volume['amount'], recipe=recipe)
+                count=ingredient_volume['amount'],
+                recipe=recipe
+            )
+            for ingredient_volume in ingredients
+        )
 
     def create_tags(self, tags, recipe):
         """
         Вспомонательная функция. Создает объект в модели RecipeTag.
         tags = [1, 2]
         """
-        for tag in tags:
-            RecipeTag.objects.create(
-                tag=Tag.objects.get(pk=tag), recipe=recipe)
+        RecipeTag.objects.bulk_create(
+            RecipeTag(
+                tag=Tag.objects.get(pk=tag),
+                recipe=recipe
+            )
+            for tag in tags
+        )
 
     def create(self, validated_data):
         """
