@@ -60,6 +60,9 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     )
     list_editable = ('recipe', 'ingredient', 'count')
     search_fields = ('recipe', 'ingredient')
+    # Рецепт без ингредиентов нельзя создать ни через админку, ни через сайт
+    # This controls the minimum number of forms to show in the inline
+    min_num = 1
 
 
 @admin.register(RecipeTag)
