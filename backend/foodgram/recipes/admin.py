@@ -4,6 +4,31 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             RecipeTag, ShoppingCart, Tag)
 
 
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'name',
+        'measurement_unit'
+    )
+    list_editable = ('name', 'measurement_unit')
+    search_fields = ('name',)
+    list_filter = ('name',)
+
+
+class IngredientInline(admin.TabularInline):
+    """
+    Вспомогательная модель для работы inlines.
+    Обеспечивает функционал, чтобы рецепт без ингредиентов нельзя создать
+    ни через админку, ни через сайт.
+    """
+
+    # Определяем родительскую модель
+    model = RecipeIngredient
+    # This controls the minimum number of forms to show in the inline
+    min_num = 1
+
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
@@ -17,16 +42,11 @@ class TagAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
-@admin.register(Ingredient)
-class IngredientAdmin(admin.ModelAdmin):
-    list_display = (
-        'pk',
-        'name',
-        'measurement_unit'
-    )
-    list_editable = ('name', 'measurement_unit')
-    search_fields = ('name',)
-    list_filter = ('name',)
+class TagInline(admin.TabularInline):
+    """Вспомогательная модель для работы inlines."""
+
+    model = RecipeTag
+    min_num = 1
 
 
 @admin.register(Recipe)
@@ -43,6 +63,8 @@ class RecipeAdmin(admin.ModelAdmin):
     list_editable = ('name', 'text', 'cooking_time')
     search_fields = ('name',)
     list_filter = ('author', 'name', 'tags')
+    # Ссылка на родительский Inline
+    inlines = [IngredientInline, TagInline]
 
     def count_favorites(self, obj):
         return obj.recipe_in_favorite.count()
@@ -60,9 +82,6 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     )
     list_editable = ('recipe', 'ingredient', 'count')
     search_fields = ('recipe', 'ingredient')
-    # Рецепт без ингредиентов нельзя создать ни через админку, ни через сайт
-    # This controls the minimum number of forms to show in the inline
-    min_num = 1
 
 
 @admin.register(RecipeTag)

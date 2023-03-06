@@ -1,17 +1,62 @@
-version: '3.3'
-services:
+# Код, чтобы построить образ для фронта.
+# Затем этот образ подключить к веб серверу, чтобы получить доступ
+# к документации (на этапе разработки)
+#
+#   frontend:
+#     build:
+#       context: ../frontend
+#       dockerfile: Dockerfile
+#     volumes:
+#       - ../frontend/:/app/result_build/
+#
+#   nginx:
+#     image: nginx:1.19.3
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+#       - ../frontend/build:/usr/share/nginx/html/
+#       - ../docs/:/usr/share/nginx/html/api/docs/
 
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+version: "3.3"
+
+services:
+  db:
+    image: postgres:13.0-alpine
     volumes:
-      - ../frontend/:/app/result_build/
+      - postgres_database:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    ports:
+      - 127.0.0.1:5432:5432
+  
+  backend:
+    # Образ берем из https://hub.docker.com/repository/docker/olegtsss/foodgram/general
+    image:  olegtsss/foodgram:v1.03.2023
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+    volumes:
+      - static_value:/app/static/
+      - media_value:/app/media/
+  
   nginx:
-    image: nginx:1.19.3
+    image: nginx:1.21.3-alpine
     ports:
       - "80:80"
+      - "443:443"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
+      # Файл default.conf должен лежать в папке /home/olegtsss/nginx/
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt/:/etc/nginx/conf.d/
+      - static_value:/var/html/static/
+      - media_value:/var/html/media/
+    depends_on:
+      - backend
+
+volumes:
+  static_value:
+  media_value:
+  postgres_database:
