@@ -43,7 +43,7 @@ pip install -r requirements.txt
 python backend/foodgram/manage.py migrate
 ```
 
-- Загрузить тестовую выборку (опционально):
+- Загрузить ингридиенты в базу:
 
 ```
 python backend/foodgram/manage.py import_into_db
@@ -85,6 +85,12 @@ docker-compose exec web python manage.py createsuperuser
 
 ```
 docker-compose exec web python manage.py collectstatic --no-input
+```
+
+- Загрузить ингридиенты в базу:
+
+```
+docker-compose exec web python manage.py import_into_db
 ```
 
 ## Настроены эндпоинты:
