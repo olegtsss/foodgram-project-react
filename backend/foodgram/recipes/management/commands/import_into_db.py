@@ -9,7 +9,9 @@ START_MESSAGE = 'Начинаем импорт...'
 STOP_MESSAGE = 'Импорт закончен...'
 IMPORT_ERROR = 'Что-то пошло не так: {error}.'
 IMPORT_MESSAGE = 'Обрабатывается набор данных: {data}'
-PATH_TO_CSV_FILES = '../../data/ingredients.csv'
+# PATH_TO_CSV_FILES = '../../data/ingredients.csv'
+# Для сборки Docker образа указать так
+PATH_TO_CSV_FILES = 'ingredients.csv'
 
 
 class Command(BaseCommand):
