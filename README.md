@@ -1,3 +1,7 @@
+# Cсылка на развернутый проект
+
+https://yandex.olegtsss.ru
+
 # Описание проекта Foodgram
 
 Cайт Foodgram, «Продуктовый помощник» - это онлайн-сервис, на котором пользователи могут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
@@ -49,6 +53,38 @@ python backend/foodgram/manage.py import_into_db
 
 ```
 python backend/foodgram/manage.py runserver
+```
+
+## Как собрать и запустить проект в контейнерах:
+- Клонировать репозиторий и перейти в него в командной строке:
+
+```
+git clone https://github.com/olegtsss/foodgram-project-react.git
+cd foodgram-project-react/infra
+```
+
+- Запуск приложения в контейнерах:
+
+```
+docker-compose up -d
+```
+
+- Выполнить миграции:
+
+```
+docker-compose exec web python manage.py migrate
+```
+
+- Cоздать суперпользователя:
+
+```
+docker-compose exec web python manage.py createsuperuser
+```
+
+- Cобрать статику:
+
+```
+docker-compose exec web python manage.py collectstatic --no-input
 ```
 
 ## Настроены эндпоинты:
@@ -134,7 +170,7 @@ python backend/foodgram/manage.py runserver
 ## Документация к API:
 
 ```
-    http://127.0.0.1/api/docs/
+    https://yandex.olegtsss.ru/api/docs/
 ```
 
 ## Шаблон наполнения env-файла:
@@ -147,7 +183,7 @@ POSTGRES_PASSWORD=postgres
 DB_HOST=db
 DB_PORT=5432
 SECRET_KEY='secret'
-DEBUG=True
+DEBUG=False
 ALLOWED_HOSTS='foodgram.olegtsss.ru'
 NEED_SQLITE=False
 ```
