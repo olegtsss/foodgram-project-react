@@ -1,15 +1,5 @@
 import base64
 
-from django.conf import settings
-from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            RecipeTag, ShoppingCart, Tag)
-from rest_framework.serializers import (CharField, ImageField, ModelSerializer,
-                                        PrimaryKeyRelatedField, Serializer,
-                                        SerializerMethodField,
-                                        StringRelatedField, ValidationError)
-
 from api.constants import (BAD_USERNAME_ERROR, CREATE_SHOPPING_CART_ERROR,
                            CREATE_SHOPPING_CART_EXIST_ERROR,
                            FOLLOW_EXIST_ERROR, FOLLOW_YOURSELF_ERROR,
@@ -17,6 +7,17 @@ from api.constants import (BAD_USERNAME_ERROR, CREATE_SHOPPING_CART_ERROR,
                            INGREDIENT_COUNT_MIN_ERROR, INGREDIENT_ID_ERROR,
                            INGREDIENT_NAME_ERROR, LIMIT_NAME_ERROR,
                            TAG_ID_ERROR, TAG_NAME_ERROR, VALIDATION_ERROR)
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            RecipeTag, ShoppingCart, Tag)
+from rest_framework.serializers import (CharField, ImageField, IntegerField,
+                                        ModelSerializer,
+                                        PrimaryKeyRelatedField, Serializer,
+                                        SerializerMethodField,
+                                        StringRelatedField, ValidationError)
+
 from users.models import Follow, User
 
 
@@ -120,7 +121,7 @@ class RecipeIngredientSerializer(ModelSerializer):
     id = PrimaryKeyRelatedField(source='ingredient', read_only=True)
     name = StringRelatedField(source='ingredient', read_only=True)
     measurement_unit = SerializerMethodField()
-    amount = CharField(source='count')
+    amount = IntegerField(source='count')
 
     class Meta:
         model = RecipeIngredient
