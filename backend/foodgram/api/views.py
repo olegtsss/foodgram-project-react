@@ -6,7 +6,6 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action, api_view
-from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin)
@@ -25,7 +24,7 @@ from api.constants import (ADD_RECIPE_IN_FAVORITE_ERROR,
                            RECIPE_IN_FAVORITE_EXIST_ERROR,
                            RECIPE_IN_FAVORITE_NOT_EXIST_ERROR,
                            RECIPES_ID_ERROR)
-from api.filters import RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly
 from api.serializers import (FollowSerializer, FollowSerializerSuscribe,
@@ -53,7 +52,7 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (AdminOrReadOnly,)
-    filter_backends = (SearchFilter,)
+    filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
 
 

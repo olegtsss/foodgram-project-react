@@ -1,6 +1,7 @@
 from django_filters.rest_framework import FilterSet
 from django_filters.rest_framework.filters import (AllValuesMultipleFilter,
                                                    BooleanFilter, CharFilter)
+from rest_framework.filters import SearchFilter
 
 from recipes.models import Recipe
 
@@ -26,3 +27,12 @@ class RecipeFilter(FilterSet):
         if value and not self.request.user.is_anonymous:
             return queryset.filter(recipe_in_cart__user=self.request.user)
         return queryset
+
+
+class IngredientFilter(SearchFilter):
+    """
+    Кастомный фильтр для ингридиентов.
+    GET http://127.0.0.1:8000/api/ingredients/?name=абрикосовый
+    """
+
+    search_param = 'name'
