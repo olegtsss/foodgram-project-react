@@ -232,12 +232,21 @@ class CustomAuthToken(ObtainAuthToken):
     """Собственная реализация контроллера выдачи токенов."""
 
     def post(self, request, *args, **kwargs):
-        if 'username' in request.data:
-            return Response({'field_errors': [
-                ERROR_MESSAGE_FOR_USERNAME
-            ]})
-        request.data['username'] = User.objects.get(
-            email=request.data['email']).username
+        if not User.objects.filter(
+            email=request.data.get('email'),
+        ).exists() or 'username' in request.data:
+            return Response(
+                {'field_errors': [ERROR_MESSAGE_FOR_USERNAME]},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        user = User.objects.get(
+            email=request.data['email'])
+        if not check_password(request.data.get('password'), user.password):
+            return Response(
+                {'field_errors': [ERROR_MESSAGE_FOR_USERNAME]},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        request.data['username'] = user.username
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)

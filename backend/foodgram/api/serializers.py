@@ -198,7 +198,9 @@ class RecipeSerializer(ModelSerializer):
                 Ingredient, id=ingredient_amount['id'])
             if ingredient in ingredients_list:
                 raise ValidationError(INGREDIENT_NAME_ERROR)
-            if not isinstance(ingredient_amount['amount'], int):
+            try:
+                ingredient_amount['amount'] = int(ingredient_amount['amount'])
+            except ValueError:
                 raise ValidationError(INGREDIENT_AMOUNT_ERROR)
             if ingredient_amount['amount'] < settings.MIN_INGREDIENT_COUNT:
                 raise ValidationError(INGREDIENT_COUNT_MIN_ERROR)
