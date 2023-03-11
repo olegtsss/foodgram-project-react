@@ -93,6 +93,38 @@ docker-compose exec web python manage.py collectstatic --no-input
 docker-compose exec web python manage.py import_into_db
 ```
 
+## Как пересобрать frontend:
+- Удаляем старый frontend:
+
+```
+rm -rf frontend/build
+```
+
+- Переходим в папку с кодом:
+
+```
+cd front_standalone/
+```
+
+- Сбор и запуск приложения в контейнерах:
+
+```
+docker-compose up -d
+```
+
+- Перенести новый frontend в проект:
+
+```
+mkdir ../frontend/build
+cp -R frontend/build/ ../frontend/build/
+```
+
+- Остановка контейнеров:
+
+```
+docker-compose stop
+```
+
 ## Настроены эндпоинты:
 
 ```
