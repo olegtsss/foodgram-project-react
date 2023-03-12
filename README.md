@@ -1,6 +1,6 @@
 # Cсылка на развернутый проект
 
-https://yandex.olegtsss.ru
+https://foodgram.olegtsss.ru
 
 # Описание проекта Foodgram
 
