@@ -1,6 +1,6 @@
 """Настройки приложения."""
 CONFIRMATION_CODE_LENGTH = 64
-MINUTE_FOR_VERIFICATION_EMAIL = 1
+MINUTE_FOR_VERIFICATION_EMAIL = 20
 MAX_COUNT_VERIFICATION_EMAIL = 10
 URL_FOR_EMAIL_VERIFICATION = 'http://127.0.0.1:8000'
 VERIFICATION_PREFIX = 'verification'
@@ -18,8 +18,6 @@ SEND_EMAIL_ERROR = (
     'Не удалось отправь электронное письмо на {email}. '
     'Код ошибки: {code}. Ошибка: {error}.'
 )
-SEND_EMAIL_ERROR_JSON = (
-    'Не удалось отправить электронное письмо на {email}! '
-    'Пользователь {username} не создан!'
-)
-BAD_CONFIRMATION_CODE = 'Не корректный confirmation code: {code}!'
+VERIFICATION_ERROR = 'Не корректный запрос!'
+VERIFICATION_OUTDATED = 'Ссылка устарела, получите новое подтверждение!'
+VERIFICATION_OK = 'Верификация пройдена!'

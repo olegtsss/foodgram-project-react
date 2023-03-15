@@ -1,27 +1,23 @@
+import datetime as dt
 import random
-from django.shortcuts import render
-from emailcheck.constants import (EMAIL_SUBJECT, EMAIL_BODY,
-                                   CONFIRMATION_CODE_LENGTH,
-                                   SEND_EMAIL, MINUTE_FOR_VERIFICATION_EMAIL,
-                                   SEND_EMAIL_ERROR, SEND_EMAIL_ERROR_JSON,
-                                   BAD_CONFIRMATION_CODE,
-                                   URL_FOR_EMAIL_VERIFICATION,
-                                   MAX_COUNT_VERIFICATION_EMAIL,
-                                   VERIFICATION_PREFIX)
+from hashlib import sha1
 from smtplib import SMTPResponseException
-from string import digits, ascii_letters
-from django.core.mail import send_mail
-from django.conf import settings
-from rest_framework import status
-from rest_framework.response import Response
+from string import ascii_letters, digits
 
-from emailcheck.models import Code
+from django.conf import settings
+from django.core.mail import send_mail
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.conf import settings
-from hashlib import sha1
 from users.models import User
-import datetime as dt
+
+from emailcheck.constants import (CONFIRMATION_CODE_LENGTH, EMAIL_BODY,
+                                  EMAIL_SUBJECT, MAX_COUNT_VERIFICATION_EMAIL,
+                                  MINUTE_FOR_VERIFICATION_EMAIL, SEND_EMAIL,
+                                  SEND_EMAIL_ERROR, URL_FOR_EMAIL_VERIFICATION,
+                                  VERIFICATION_ERROR, VERIFICATION_OK,
+                                  VERIFICATION_OUTDATED, VERIFICATION_PREFIX)
+from emailcheck.models import Code
 
 
 def validate_email(**validated_data):
@@ -80,7 +76,43 @@ def validate_email(**validated_data):
 
 @api_view(('GET',))
 def verification_request(request, email_hash, confirmation_code):
-    """Обрабатывать запросы для верификации email."""
-    pass
-        #    return Response(serializer.data, status=status.HTTP_201_CREATED)
-        #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    """Обрабатывает запросы для верификации email."""
+    # 1. Такого пользователя не было
+    if not Code.objects.filter(email_hash=email_hash).exists():
+        return Response(VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+    verification_user = Code.objects.get(email_hash=email_hash)
+    # Ссылка протухла
+    if dt.datetime.now(verification_user.date_joined.tzinfo) > (
+            verification_user.date_joined + dt.timedelta(
+                minutes=MINUTE_FOR_VERIFICATION_EMAIL)
+    ):
+        # 2. Код не верный
+        if verification_user.confirmation_code != confirmation_code:
+            return Response(
+                VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+        # 3. Верный код
+        if verification_user.confirmation_code == confirmation_code:
+            return Response(
+                VERIFICATION_OUTDATED, status=status.HTTP_400_BAD_REQUEST)
+    # 4. Много попыток
+    if verification_user.count > MAX_COUNT_VERIFICATION_EMAIL:
+        return Response(VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+    # 5. Код не верный
+    if verification_user.confirmation_code != confirmation_code:
+        verification_user.count += 1
+        verification_user.save()
+        return Response(
+            VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+    # 6. Код верный
+    verification_user.is_active = True
+    verification_user.save()
+    User.objects.create(
+        date_joined=verification_user.date_joined,
+        username=verification_user.username,
+        email=verification_user.email,
+        first_name=verification_user.first_name,
+        last_name=verification_user.last_name,
+        password=verification_user.password,
+        is_active=True
+    )
+    return Response(VERIFICATION_OK, status=status.HTTP_200_OK)

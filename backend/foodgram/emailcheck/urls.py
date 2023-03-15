@@ -1,5 +1,6 @@
-from emailcheck.views import verification_request
 from django.conf.urls import url
+
+from emailcheck.views import verification_request
 
 
 # 64 = CONFIRMATION_CODE_LENGTH from emailcheck.constants
