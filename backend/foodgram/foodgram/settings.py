@@ -22,6 +22,8 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     # Приложение recipes
     'recipes.apps.RecipesConfig',
+    # Приложение для проверки принадлежности email пользователю
+    'emailcheck.apps.EmailcheckConfig',
     'rest_framework',
     'corsheaders',
     'django_filters',
@@ -153,3 +155,20 @@ MAX_INGREDIENT_COUNT = 999999999
 INGREDIENT_COUNT_MESSAGE = 'Указано не корректное количество.'
 # Ограничение для работы пагинатора CustomPagination
 PAGE_SIZE = 50
+
+# SMTP backend
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Backend для эмуляции почтового сервера
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+# Директория для писем при эмуляции
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+URL_FOR_EMAIL_VERIFICATION = os.getenv('URL_FOR_EMAIL_VERIFICATION')
+CONFIRMATION_CODE_LENGTH = 64
+MINUTE_FOR_VERIFICATION_EMAIL = 1
+MAX_COUNT_VERIFICATION_EMAIL = 10

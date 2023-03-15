@@ -36,6 +36,7 @@ from api.serializers import (FollowSerializer, FollowSerializerSuscribe,
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import Follow, User
+from emailcheck.views import validate_email
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -192,8 +193,26 @@ class Subscribe(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class CustomCreateModelMixin(CreateModelMixin):
+    """Класс переопределен, добавлена проверка принадлежности email."""
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # Добавленный код
+        return Response(
+            {'message': validate_email(**serializer.validated_data)},
+            status=status.HTTP_200_OK)
+        # Старый код
+        # self.perform_create(serializer)
+        # headers = self.get_success_headers(serializer.data)
+        # return Response(
+        #     serializer.data, status=status.HTTP_201_CREATED,
+        #     headers=headers)
+
+
 class UserViewSet(
-    CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet
+    CustomCreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet
 ):
     """Работа с пользователями."""
 
