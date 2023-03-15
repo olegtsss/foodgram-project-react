@@ -1,9 +1,13 @@
 import random
 from django.shortcuts import render
 from emailcheck.constants import (EMAIL_SUBJECT, EMAIL_BODY,
-                                   SEND_EMAIL,
+                                   CONFIRMATION_CODE_LENGTH,
+                                   SEND_EMAIL, MINUTE_FOR_VERIFICATION_EMAIL,
                                    SEND_EMAIL_ERROR, SEND_EMAIL_ERROR_JSON,
-                                   BAD_CONFIRMATION_CODE)
+                                   BAD_CONFIRMATION_CODE,
+                                   URL_FOR_EMAIL_VERIFICATION,
+                                   MAX_COUNT_VERIFICATION_EMAIL,
+                                   VERIFICATION_PREFIX)
 from smtplib import SMTPResponseException
 from string import digits, ascii_letters
 from django.core.mail import send_mail
@@ -27,29 +31,28 @@ def validate_email(**validated_data):
     делать не нужно, так как после активации будет создан объект в модели User.
     Сериализатор не разрешит повторное использование username и email.
     """
-    email = validated_data.get('email')
-    if Code.objects.filter(email=email).exists():
-        # Проверка, что ссылка верификации не устарела или bruteforce
-        verification_user = Code.objects.get(email=email)
-        # В объект добавляется информация о временной зоне из другого объекта
+    if Code.objects.filter(email=validated_data['email']).exists():
+        # Проверка, что ссылка верификации не устарела
+        verification_user = Code.objects.get(email=validated_data['email'])
+        # В datetime добавляется информация о временной зоне из другого объекта
         if dt.datetime.now(verification_user.date_joined.tzinfo) < (
             verification_user.date_joined + dt.timedelta(
-                minutes=settings.MINUTE_FOR_VERIFICATION_EMAIL)
-        ) or verification_user.count < settings.MAX_COUNT_VERIFICATION_EMAIL:
-            return SEND_EMAIL.format(email=email)
+                minutes=MINUTE_FOR_VERIFICATION_EMAIL)
+        ):
+            return SEND_EMAIL.format(email=validated_data['email'])
         # Ссылка устарела, значит нужно генерировать все заново
         verification_user.delete()
     # Верификация проходит впервые или отправленная ранее ссылка устарела
     confirmation_code = (
         ''.join(random.choices(
-            ascii_letters + digits, k=settings.CONFIRMATION_CODE_LENGTH)
+            ascii_letters + digits, k=CONFIRMATION_CODE_LENGTH)
         )
     )
     # Email содержит символ Unicode, поэтому сначала необходимо
     # выполнить преобразование encode
-    email_hash = sha1(email.encode('utf-8')).hexdigest()
+    email_hash = sha1(validated_data['email'].encode('utf-8')).hexdigest()
     link = (
-        f'{settings.URL_FOR_EMAIL_VERIFICATION}verification/'
+        f'{URL_FOR_EMAIL_VERIFICATION}/{VERIFICATION_PREFIX}/'
         f'{email_hash}/{confirmation_code}/'
     )
     try:
@@ -57,7 +60,7 @@ def validate_email(**validated_data):
             EMAIL_SUBJECT,
             EMAIL_BODY.format(link=link),
             settings.EMAIL_HOST_USER,
-            [email, ],
+            [validated_data['email'], ],
             fail_silently=False,
         )
         # Через метод create_user, чтобы пароль был хеширован
@@ -67,18 +70,17 @@ def validate_email(**validated_data):
         Code.objects.create(
             **validated_data, email_hash=email_hash,
             confirmation_code=confirmation_code, is_active=False)
-        return SEND_EMAIL.format(email=email)
+        return SEND_EMAIL.format(email=validated_data['email'])
 
     except SMTPResponseException as error:
         return SEND_EMAIL_ERROR.format(
-            email=email, code=error.smtp_code, error=error.smtp_error)
+            email=validated_data['email'],
+            code=error.smtp_code, error=error.smtp_error)
 
 
 @api_view(('GET',))
-def verification_request(request):
+def verification_request(request, email_hash, confirmation_code):
     """Обрабатывать запросы для верификации email."""
     pass
         #    return Response(serializer.data, status=status.HTTP_201_CREATED)
         #return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #cats = Cat.objects.all()							
-					

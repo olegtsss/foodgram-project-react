@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from emailcheck.constants import CONFIRMATION_CODE_LENGTH
 
 
 class Code(models.Model):
@@ -43,9 +44,9 @@ class Code(models.Model):
         max_length=40
     )
     confirmation_code = models.CharField(
-        'Cсылка подтверждения',
+        'Код подтверждения',
         blank=True,
-        max_length=settings.CONFIRMATION_CODE_LENGTH,
+        max_length=CONFIRMATION_CODE_LENGTH,
     )
     count = models.PositiveIntegerField(
         'Счетчик попыток',
