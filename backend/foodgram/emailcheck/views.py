@@ -7,19 +7,20 @@ from string import ascii_letters, digits
 from django.conf import settings
 from django.core.mail import send_mail
 from django.http import HttpResponseRedirect
+from emailcheck.constants import (CONFIRMATION_CODE_LENGTH, EMAIL_BODY,
+                                  EMAIL_BODY_SUCCESS, EMAIL_SUBJECT,
+                                  EMAIL_SUBJECT_SUCCESS,
+                                  MAX_COUNT_VERIFICATION_EMAIL,
+                                  MINUTE_FOR_VERIFICATION_EMAIL, SEND_EMAIL,
+                                  SEND_EMAIL_ERROR, URL_FOR_EMAIL_VERIFICATION,
+                                  VERIFICATION_ALREADY_DONE,
+                                  VERIFICATION_ERROR, VERIFICATION_OUTDATED,
+                                  VERIFICATION_PREFIX)
+from emailcheck.models import Code
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from users.models import User
-
-from emailcheck.constants import (CONFIRMATION_CODE_LENGTH, EMAIL_BODY,
-                                  EMAIL_SUBJECT, MAX_COUNT_VERIFICATION_EMAIL,
-                                  MINUTE_FOR_VERIFICATION_EMAIL, SEND_EMAIL,
-                                  SEND_EMAIL_ERROR, URL_FOR_EMAIL_VERIFICATION,
-                                  VERIFICATION_ERROR, VERIFICATION_OUTDATED,
-                                  VERIFICATION_PREFIX, EMAIL_BODY_SUCCESS,
-                                  EMAIL_SUBJECT_SUCCESS)
-from emailcheck.models import Code
 
 
 def validate_email(**validated_data):
@@ -93,9 +94,9 @@ def verification_request(request, email_hash, confirmation_code):
             return Response(
                 VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
         # 3. Верный код
-        if verification_user.confirmation_code == confirmation_code:
-            return Response(
-                VERIFICATION_OUTDATED, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            VERIFICATION_OUTDATED, status=status.HTTP_400_BAD_REQUEST)
+    # Далее условия, если ссылка не протухла
     # 4. Много попыток
     if verification_user.count > MAX_COUNT_VERIFICATION_EMAIL:
         return Response(VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
@@ -105,7 +106,11 @@ def verification_request(request, email_hash, confirmation_code):
         verification_user.save()
         return Response(
             VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
-    # 6. Код верный
+    # 7. Код верный, но пользователь уже активирован
+    if verification_user.is_active:
+        return Response(
+            VERIFICATION_ALREADY_DONE, status=status.HTTP_400_BAD_REQUEST)
+    # 8. Код верный, все хорошо
     verification_user.is_active = True
     verification_user.save()
     User.objects.create(

@@ -26,7 +26,14 @@ Content-Type: application/json
 GET http://127.0.0.1:8000/verification/5eb51149...f099df0/MOmr25X...V1ObMu5/
 
 Интеграция в проект:
-1) Переопределяем CreateModelMixin:
+1) Добавляем приложение в settings.py
+INSTALLED_APPS = [
+    ...
+    'emailcheck.apps.EmailcheckConfig',
+    ...
+]
+
+2) Переопределяем CreateModelMixin:
 
 class UserViewSet(
     CustomCreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet
@@ -42,13 +49,13 @@ class CustomCreateModelMixin(CreateModelMixin):
             {'message': validate_email(**serializer.validated_data)},
             status=status.HTTP_200_OK)
 
-2) Подключаем нужный роут в главном urls.py:
+3) Подключаем нужный роут в главном urls.py:
 urlpatterns = [
     ...
     path(f'{VERIFICATION_PREFIX}/', include('emailcheck.urls')),
 ]
 
-3) Ограничиваем интенсивность запросов для защиты своего почтового сервера:
+4) Ограничиваем интенсивность запросов для защиты своего почтового сервера:
 REST_FRAMEWORK = {
     ...
     'DEFAULT_THROTTLE_CLASSES': [
@@ -59,7 +66,7 @@ REST_FRAMEWORK = {
     }
 }
 
-4) Настраиваем SMTP backend:
+5) Настраиваем SMTP backend:
 if os.getenv('SMTP_BACKEND_EMULATION'):
     EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
     EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
@@ -71,7 +78,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 
-5) Добавляем переменные окружения:
+6) Добавляем переменные окружения:
 EMAIL_HOST =
 EMAIL_PORT =
 EMAIL_HOST_USER =
@@ -79,7 +86,7 @@ EMAIL_HOST_PASSWORD =
 EMAIL_USE_TLS =
 SMTP_BACKEND_EMULATION =
 
-6) В emailcheck.urls проверяем длину <confirmation_code> внутри регулярного
+7) В emailcheck.urls проверяем длину <confirmation_code> внутри регулярного
 выражения (по умолчанию равна 64, однако не извлекается из переменной
 CONFIRMATION_CODE_LENGTH)
 """
@@ -115,3 +122,4 @@ SEND_EMAIL_ERROR = (
 )
 VERIFICATION_ERROR = 'Не корректный запрос!'
 VERIFICATION_OUTDATED = 'Ссылка устарела, получите новое подтверждение!'
+VERIFICATION_ALREADY_DONE = 'Ваш email уже подтвержден!'
