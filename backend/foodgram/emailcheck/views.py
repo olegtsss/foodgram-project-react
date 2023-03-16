@@ -6,6 +6,7 @@ from string import ascii_letters, digits
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.http import HttpResponseRedirect
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,8 +16,9 @@ from emailcheck.constants import (CONFIRMATION_CODE_LENGTH, EMAIL_BODY,
                                   EMAIL_SUBJECT, MAX_COUNT_VERIFICATION_EMAIL,
                                   MINUTE_FOR_VERIFICATION_EMAIL, SEND_EMAIL,
                                   SEND_EMAIL_ERROR, URL_FOR_EMAIL_VERIFICATION,
-                                  VERIFICATION_ERROR, VERIFICATION_OK,
-                                  VERIFICATION_OUTDATED, VERIFICATION_PREFIX)
+                                  VERIFICATION_ERROR, VERIFICATION_OUTDATED,
+                                  VERIFICATION_PREFIX, EMAIL_BODY_SUCCESS,
+                                  EMAIL_SUBJECT_SUCCESS)
 from emailcheck.models import Code
 
 
@@ -115,4 +117,16 @@ def verification_request(request, email_hash, confirmation_code):
         password=verification_user.password,
         is_active=True
     )
-    return Response(VERIFICATION_OK, status=status.HTTP_200_OK)
+    try:
+        send_mail(
+            EMAIL_SUBJECT_SUCCESS,
+            EMAIL_BODY_SUCCESS,
+            settings.EMAIL_HOST_USER,
+            [verification_user.email, ],
+            fail_silently=False,
+        )
+    except SMTPResponseException as error:
+        return SEND_EMAIL_ERROR.format(
+            email=verification_user.email,
+            code=error.smtp_code, error=error.smtp_error)
+    return HttpResponseRedirect(redirect_to=URL_FOR_EMAIL_VERIFICATION)
