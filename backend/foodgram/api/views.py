@@ -196,6 +196,8 @@ class Subscribe(APIView):
 class CustomCreateModelMixin(CreateModelMixin):
     """Класс переопределен, добавлена проверка принадлежности email."""
 
+    throttle_scope = 'low_request'
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

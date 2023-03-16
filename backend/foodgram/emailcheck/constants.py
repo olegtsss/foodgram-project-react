@@ -1,3 +1,89 @@
+"""
+Приложение предназначено для верификации email при регистрации.
+(пользователь создается посредством API - набор ModelMixin).
+
+Логика работы:
+1) API получает запрос на создание нового пользователя.
+2) Новый пользователь не создается, вместо это создается объект в новой
+модели. Она не унаследована от User, однако имеет точно такие же поля.
+3) Пользователь получает email с ссылкой валидации, после перехода по
+ней создается первоначальный объект в модели User.
+4) Учтены самые разные ситуации, попытки подбора ссылки и многое другое.
+
+Примеры запросов:
+### Создание пользователя ###
+POST http://127.0.0.1:8000/api/users/
+Content-Type: application/json
+
+{
+    "email": "admin2@admin.ru",
+    "username": "vasya.pupkin2",
+    "first_name": "Вася",
+    "last_name": "Пупкин",
+    "password": "Qwerty123"
+}
+### Верификация email ###
+GET http://127.0.0.1:8000/verification/5eb51149...f099df0/MOmr25X...V1ObMu5/
+
+Интеграция в проект:
+1) Переопределяем CreateModelMixin:
+
+class UserViewSet(
+    CustomCreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet
+):
+    ...
+class CustomCreateModelMixin(CreateModelMixin):
+    throttle_scope = 'low_request'
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # Добавленный код
+        return Response(
+            {'message': validate_email(**serializer.validated_data)},
+            status=status.HTTP_200_OK)
+
+2) Подключаем нужный роут в главном urls.py:
+urlpatterns = [
+    ...
+    path(f'{VERIFICATION_PREFIX}/', include('emailcheck.urls')),
+]
+
+3) Ограничиваем интенсивность запросов для защиты своего почтового сервера:
+REST_FRAMEWORK = {
+    ...
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'low_request': '1/minute',
+    }
+}
+
+4) Настраиваем SMTP backend:
+if os.getenv('SMTP_BACKEND_EMULATION'):
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+
+5) Добавляем переменные окружения:
+EMAIL_HOST =
+EMAIL_PORT =
+EMAIL_HOST_USER =
+EMAIL_HOST_PASSWORD =
+EMAIL_USE_TLS =
+SMTP_BACKEND_EMULATION =
+
+6) В emailcheck.urls проверяем длину <confirmation_code> внутри регулярного
+выражения (по умолчанию равна 64, однако не извлекается из переменной
+CONFIRMATION_CODE_LENGTH)
+"""
+
 """Настройки приложения."""
 CONFIRMATION_CODE_LENGTH = 64
 MINUTE_FOR_VERIFICATION_EMAIL = 20

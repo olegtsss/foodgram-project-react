@@ -105,7 +105,7 @@ MEDIA_URL = '/media/'
 # MEDIA_URL = 'http://localhost:8000/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AUTH_USER_MODEL = 'users.User'
-# Работа с токенами
+# Работа REST
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -113,6 +113,12 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'low_request': '1/minute',
+    }
 }
 # CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
@@ -157,12 +163,13 @@ INGREDIENT_COUNT_MESSAGE = 'Указано не корректное колич�
 PAGE_SIZE = 50
 
 # SMTP backend
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# Backend для эмуляции почтового сервера
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-# Директория для писем при эмуляции
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-
+if os.getenv('SMTP_BACKEND_EMULATION'):
+    # Backend для эмуляции почтового сервера
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    # Директория для писем при эмуляции
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
