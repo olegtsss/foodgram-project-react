@@ -105,6 +105,9 @@ EMAIL_BODY = (
     'Для подтверждения email воспользуйтесь ссылкой из письма:\n'
     '\n'
     '{link}'
+    '\n\n'
+    'По вопросам работы сервиса можно обращаться на почтовый адрес '
+    'foodgram@mail.olegtsss.ru'
 )
 EMAIL_SUBJECT_SUCCESS = 'Ваш email на сервисе Foodgram подтвержден!'
 EMAIL_BODY_SUCCESS = (
