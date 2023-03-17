@@ -81,13 +81,13 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 
 6) Добавляем переменные окружения:
-EMAIL_HOST =
-EMAIL_PORT =
-EMAIL_HOST_USER =
-EMAIL_HOST_PASSWORD =
-EMAIL_USE_TLS =
-SMTP_BACKEND_EMULATION =
-URL_FOR_EMAIL_VERIFICATION =
+EMAIL_HOST=
+EMAIL_PORT=
+EMAIL_HOST_USER=
+EMAIL_HOST_PASSWORD=
+EMAIL_USE_TLS=
+SMTP_BACKEND_EMULATION=
+URL_FOR_EMAIL_VERIFICATION=
 
 7) В emailcheck.urls проверяем длину <confirmation_code> внутри регулярного
 выражения (по умолчанию равна 64, однако не извлекается из переменной
