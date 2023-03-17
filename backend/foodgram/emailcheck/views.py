@@ -12,8 +12,7 @@ from emailcheck.constants import (CONFIRMATION_CODE_LENGTH, EMAIL_BODY,
                                   EMAIL_SUBJECT_SUCCESS,
                                   MAX_COUNT_VERIFICATION_EMAIL,
                                   MINUTE_FOR_VERIFICATION_EMAIL, SEND_EMAIL,
-                                  SEND_EMAIL_ERROR, URL_FOR_EMAIL_VERIFICATION,
-                                  VERIFICATION_ALREADY_DONE,
+                                  SEND_EMAIL_ERROR, VERIFICATION_ALREADY_DONE,
                                   VERIFICATION_ERROR, VERIFICATION_OUTDATED,
                                   VERIFICATION_PREFIX)
 from emailcheck.models import Code
@@ -51,7 +50,7 @@ def validate_email(**validated_data):
     # выполнить преобразование encode
     email_hash = sha1(validated_data['email'].encode('utf-8')).hexdigest()
     link = (
-        f'{URL_FOR_EMAIL_VERIFICATION}/{VERIFICATION_PREFIX}/'
+        f'{settings.URL_FOR_EMAIL_VERIFICATION}/{VERIFICATION_PREFIX}/'
         f'{email_hash}/{confirmation_code}/'
     )
     try:
@@ -134,4 +133,5 @@ def verification_request(request, email_hash, confirmation_code):
         return SEND_EMAIL_ERROR.format(
             email=verification_user.email,
             code=error.smtp_code, error=error.smtp_error)
-    return HttpResponseRedirect(redirect_to=URL_FOR_EMAIL_VERIFICATION)
+    return HttpResponseRedirect(
+        redirect_to=settings.URL_FOR_EMAIL_VERIFICATION)

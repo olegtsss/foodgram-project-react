@@ -32,6 +32,8 @@ INSTALLED_APPS = [
     'emailcheck.apps.EmailcheckConfig',
     ...
 ]
+URL_FOR_EMAIL_VERIFICATION = os.getenv(
+    'URL_FOR_EMAIL_VERIFICATION', default='http://127.0.0.1:8000')
 
 2) Переопределяем CreateModelMixin:
 
@@ -85,6 +87,7 @@ EMAIL_HOST_USER =
 EMAIL_HOST_PASSWORD =
 EMAIL_USE_TLS =
 SMTP_BACKEND_EMULATION =
+URL_FOR_EMAIL_VERIFICATION =
 
 7) В emailcheck.urls проверяем длину <confirmation_code> внутри регулярного
 выражения (по умолчанию равна 64, однако не извлекается из переменной
@@ -95,7 +98,6 @@ CONFIRMATION_CODE_LENGTH)
 CONFIRMATION_CODE_LENGTH = 64
 MINUTE_FOR_VERIFICATION_EMAIL = 20
 MAX_COUNT_VERIFICATION_EMAIL = 10
-URL_FOR_EMAIL_VERIFICATION = 'http://127.0.0.1:8000'
 VERIFICATION_PREFIX = 'verification'
 
 
