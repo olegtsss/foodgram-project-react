@@ -92,6 +92,16 @@ URL_FOR_EMAIL_VERIFICATION=
 7) В emailcheck.urls проверяем длину <confirmation_code> внутри регулярного
 выражения (по умолчанию равна 64, однако не извлекается из переменной
 CONFIRMATION_CODE_LENGTH)
+
+8) В nginx.conf пробрасываем роут:
+location /verification/ {
+        proxy_pass http://backend:8000/verification/;
+        proxy_set_header        Host $host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto $scheme;
+}
+
 """
 
 """Настройки приложения."""
