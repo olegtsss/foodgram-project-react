@@ -135,6 +135,7 @@ SEND_EMAIL_ERROR = (
     'Не удалось отправь электронное письмо на {email}. '
     'Код ошибки: {code}. Ошибка: {error}.'
 )
-VERIFICATION_ERROR = 'Не корректный запрос!'
-VERIFICATION_OUTDATED = 'Ссылка устарела, получите новое подтверждение!'
-VERIFICATION_ALREADY_DONE = 'Ваш email уже подтвержден!'
+VERIFICATION_ERROR = {'error': 'Invalid request!'}
+VERIFICATION_OUTDATED = {
+    'error': 'Link expired, get a new confirmation!'}
+VERIFICATION_ALREADY_DONE = {'error': 'Your email has already been verified!'}

@@ -6,7 +6,7 @@ from string import ascii_letters, digits
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from emailcheck.constants import (CONFIRMATION_CODE_LENGTH, EMAIL_BODY,
                                   EMAIL_BODY_SUCCESS, EMAIL_SUBJECT,
                                   EMAIL_SUBJECT_SUCCESS,
@@ -16,9 +16,8 @@ from emailcheck.constants import (CONFIRMATION_CODE_LENGTH, EMAIL_BODY,
                                   VERIFICATION_ERROR, VERIFICATION_OUTDATED,
                                   VERIFICATION_PREFIX)
 from emailcheck.models import Code
-from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
+# from rest_framework.response import Response
 from users.models import User
 
 
@@ -81,7 +80,7 @@ def verification_request(request, email_hash, confirmation_code):
     """Обрабатывает запросы для верификации email."""
     # 1. Такого пользователя не было
     if not Code.objects.filter(email_hash=email_hash).exists():
-        return Response(VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(VERIFICATION_ERROR)
     verification_user = Code.objects.get(email_hash=email_hash)
     # Ссылка протухла
     if dt.datetime.now(verification_user.date_joined.tzinfo) > (
@@ -90,25 +89,21 @@ def verification_request(request, email_hash, confirmation_code):
     ):
         # 2. Код не верный
         if verification_user.confirmation_code != confirmation_code:
-            return Response(
-                VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse(VERIFICATION_ERROR)
         # 3. Верный код
-        return Response(
-            VERIFICATION_OUTDATED, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(VERIFICATION_OUTDATED)
     # Далее условия, если ссылка не протухла
     # 4. Много попыток
     if verification_user.count > MAX_COUNT_VERIFICATION_EMAIL:
-        return Response(VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(VERIFICATION_ERROR)
     # 5. Код не верный
     if verification_user.confirmation_code != confirmation_code:
         verification_user.count += 1
         verification_user.save()
-        return Response(
-            VERIFICATION_ERROR, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(VERIFICATION_ERROR)
     # 7. Код верный, но пользователь уже активирован
     if verification_user.is_active:
-        return Response(
-            VERIFICATION_ALREADY_DONE, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(VERIFICATION_ALREADY_DONE)
     # 8. Код верный, все хорошо
     verification_user.is_active = True
     verification_user.save()

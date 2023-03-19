@@ -204,7 +204,7 @@ class CustomCreateModelMixin(CreateModelMixin):
         # Добавленный код
         return Response(
             {'message': validate_email(**serializer.validated_data)},
-            status=status.HTTP_200_OK)
+            status=status.HTTP_418_IM_A_TEAPOT)
         # Старый код
         # self.perform_create(serializer)
         # headers = self.get_success_headers(serializer.data)
