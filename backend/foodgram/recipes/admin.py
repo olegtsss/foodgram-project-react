@@ -67,6 +67,7 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = [IngredientInline, TagInline]
 
     def count_favorites(self, obj):
+        """Сколько раз он добавлен пользователями в избранное."""
         return obj.recipe_in_favorite.count()
 
     count_favorites.short_description = 'В избранном'

@@ -11,6 +11,7 @@ class AdminOrReadOnly(BasePermission):
 
 class AdminOrAuthorOrReadOnly(BasePermission):
     def has_permission(self, request, view):
+        # Этот метод нужен, иначе может провалиться второй метод
         return (
             request.method in SAFE_METHODS or request.user.is_authenticated
         )

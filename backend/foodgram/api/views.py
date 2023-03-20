@@ -54,6 +54,7 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (IngredientFilter,)
+    # Помощник для пользователя при создании рецепта
     search_fields = ('^name',)
 
 
@@ -98,7 +99,7 @@ class RecipesViewSet(ModelViewSet):
             return Response(
                 RecipeFavoriteSerializer(recipe).data,
                 status=status.HTTP_201_CREATED)
-        # Удалить рецепт из избранного
+        # Удалить рецепт из избранного (метод delete)
         if not Favorite.objects.filter(recipe=recipe, user=user).exists():
             return Response(
                 RECIPE_IN_FAVORITE_NOT_EXIST_ERROR,

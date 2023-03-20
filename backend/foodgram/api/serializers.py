@@ -68,7 +68,7 @@ class UserSerializer(ModelSerializer):
 class UserCreateSerializer(ModelSerializer):
     """
     Сериализатор для модели User, создание пользователя.
-    Учитывает необходимость хешиования пароля.
+    Учитывает необходимость хеширования пароля.
     """
 
     class Meta:
