@@ -1,6 +1,6 @@
 # Cсылка на развернутый проект
 
-https://foodgram.git.olegtsss.ru
+https://foodgram.git.olegtsss.ru/recipes
 
 # Описание проекта Foodgram
 
